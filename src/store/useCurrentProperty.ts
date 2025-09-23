@@ -1,73 +1,36 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Property } from '../services/supabase/types';
-import logger from '../utils/logger';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import logger from "../utils/logger";
 
-interface CurrentPropertyState {
+type PropertyState = {
   currentPropertyId: string | null;
-  currentProperty: Property | null;
-  setCurrentProperty: (property: Property) => void;
-  setCurrentPropertyId: (id: string | null) => void;
+  setCurrentProperty: (id: string) => void;
   clearCurrentProperty: () => void;
-  isPropertySelected: boolean;
-}
+};
 
-export const useCurrentProperty = create<CurrentPropertyState>()(
+export const useCurrentProperty = create<PropertyState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       currentPropertyId: null,
-      currentProperty: null,
-      isPropertySelected: false,
-
-      setCurrentProperty: (property: Property) => {
-        logger.info('Setting current property:', { id: property.id, address: property.address });
-        set({
-          currentPropertyId: property.id,
-          currentProperty: property,
-          isPropertySelected: true
-        });
+      setCurrentProperty: (id) => {
+        logger.info("[Property] set", id);
+        set({ currentPropertyId: id });
       },
-
-      setCurrentPropertyId: (id: string | null) => {
-        logger.info('Setting current property ID:', id);
-        set({
-          currentPropertyId: id,
-          currentProperty: null, // Will be loaded by components
-          isPropertySelected: !!id
-        });
-      },
-
       clearCurrentProperty: () => {
-        logger.info('Clearing current property');
-        set({
-          currentPropertyId: null,
-          currentProperty: null,
-          isPropertySelected: false
-        });
-      }
+        logger.info("[Property] clear");
+        set({ currentPropertyId: null });
+      },
     }),
     {
-      name: 'current-property-storage',
-      partialize: (state) => ({
-        currentPropertyId: state.currentPropertyId,
-        // Don't persist the full property object, just the ID
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.currentPropertyId) {
-          logger.info('Rehydrated current property ID:', state.currentPropertyId);
-          // Set isPropertySelected based on whether we have an ID
-          state.isPropertySelected = true;
+      name: "property-context",
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? window.localStorage : {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
         }
-      }
+      ),
+      version: 1,
     }
   )
 );
-
-// Helper hooks for common use cases
-export const useCurrentPropertyId = () => useCurrentProperty(state => state.currentPropertyId);
-export const useIsPropertySelected = () => useCurrentProperty(state => state.isPropertySelected);
-export const useCurrentPropertyActions = () => useCurrentProperty(state => ({
-  setCurrentProperty: state.setCurrentProperty,
-  setCurrentPropertyId: state.setCurrentPropertyId,
-  clearCurrentProperty: state.clearCurrentProperty
-}));
