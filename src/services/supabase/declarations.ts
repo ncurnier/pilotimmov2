@@ -1,6 +1,14 @@
 import { supabase } from '../../config/supabase'
 import type { Declaration } from './types'
 import logger from '../../utils/logger'
+import { ensureNumber } from './numeric'
+
+const normalizeDeclaration = (declaration: Declaration): Declaration => ({
+  ...declaration,
+  total_revenue: ensureNumber((declaration as unknown as { total_revenue: unknown }).total_revenue),
+  total_expenses: ensureNumber((declaration as unknown as { total_expenses: unknown }).total_expenses),
+  net_result: ensureNumber((declaration as unknown as { net_result: unknown }).net_result)
+})
 
 export const declarationService = {
   async create(declarationData: Omit<Declaration, 'id' | 'created_at' | 'updated_at'>): Promise<Declaration> {
@@ -14,7 +22,7 @@ export const declarationService = {
       if (error) throw error
       
       logger.info('Declaration created successfully', { id: data.id })
-      return data
+      return normalizeDeclaration(data)
     } catch (error) {
       logger.error('Failed to create declaration', error)
       throw error
@@ -30,7 +38,7 @@ export const declarationService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return data ? normalizeDeclaration(data) : null
     } catch (error) {
       logger.error('Failed to get declaration by ID', error)
       throw error
@@ -46,7 +54,7 @@ export const declarationService = {
         .order('year', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data || []).map(normalizeDeclaration)
     } catch (error) {
       logger.error('Failed to get declarations by user ID', error)
       throw error

@@ -1,6 +1,12 @@
 import { supabase } from '../../config/supabase'
 import type { Revenue } from './types'
 import logger from '../../utils/logger'
+import { ensureNumber } from './numeric'
+
+const normalizeRevenue = (revenue: Revenue): Revenue => ({
+  ...revenue,
+  amount: ensureNumber((revenue as unknown as { amount: unknown }).amount)
+})
 
 export const revenueService = {
   async create(revenueData: Omit<Revenue, 'id' | 'created_at' | 'updated_at'>): Promise<Revenue> {
@@ -14,7 +20,7 @@ export const revenueService = {
       if (error) throw error
       
       logger.info('Revenue created successfully', { id: data.id })
-      return data
+      return normalizeRevenue(data)
     } catch (error) {
       logger.error('Failed to create revenue', error)
       throw error
@@ -30,7 +36,7 @@ export const revenueService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return data ? normalizeRevenue(data) : null
     } catch (error) {
       logger.error('Failed to get revenue by ID', error)
       throw error
@@ -46,7 +52,7 @@ export const revenueService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data || []).map(normalizeRevenue)
     } catch (error) {
       logger.error('Failed to get revenues by property ID', error)
       throw error
@@ -62,7 +68,7 @@ export const revenueService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data || []).map(normalizeRevenue)
     } catch (error) {
       logger.error('Failed to get revenues by user ID', error)
       throw error

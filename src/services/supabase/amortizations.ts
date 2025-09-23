@@ -1,6 +1,15 @@
 import { supabase } from '../../config/supabase'
 import type { Amortization } from './types'
 import logger from '../../utils/logger'
+import { ensureNumber } from './numeric'
+
+const normalizeAmortization = (amortization: Amortization): Amortization => ({
+  ...amortization,
+  purchase_amount: ensureNumber((amortization as unknown as { purchase_amount: unknown }).purchase_amount),
+  annual_amortization: ensureNumber((amortization as unknown as { annual_amortization: unknown }).annual_amortization),
+  accumulated_amortization: ensureNumber((amortization as unknown as { accumulated_amortization: unknown }).accumulated_amortization),
+  remaining_value: ensureNumber((amortization as unknown as { remaining_value: unknown }).remaining_value)
+})
 
 export const amortizationService = {
   async create(amortizationData: Omit<Amortization, 'id' | 'created_at' | 'updated_at'>): Promise<Amortization> {
@@ -24,7 +33,7 @@ export const amortizationService = {
       if (error) throw error
       
       logger.info('Amortization created successfully', { id: data.id })
-      return data
+      return normalizeAmortization(data)
     } catch (error) {
       logger.error('Failed to create amortization', error)
       throw error
@@ -40,7 +49,7 @@ export const amortizationService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return data ? normalizeAmortization(data) : null
     } catch (error) {
       logger.error('Failed to get amortization by ID', error)
       throw error
@@ -56,7 +65,7 @@ export const amortizationService = {
         .order('purchase_date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data || []).map(normalizeAmortization)
     } catch (error) {
       logger.error('Failed to get amortizations by user ID', error)
       throw error
@@ -72,7 +81,7 @@ export const amortizationService = {
         .order('purchase_date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data || []).map(normalizeAmortization)
     } catch (error) {
       logger.error('Failed to get amortizations by property ID', error)
       throw error
@@ -133,15 +142,15 @@ export const amortizationService = {
 
       let totalAnnualAmortization = 0
 
-      for (const amortization of data || []) {
+      for (const amortization of (data || []).map(normalizeAmortization)) {
         const purchaseYear = new Date(amortization.purchase_date).getFullYear()
         const yearsElapsed = year - purchaseYear + 1
-        
+
         // Vérifier si l'amortissement est applicable pour cette année
-        if (yearsElapsed > 0 && 
-            yearsElapsed <= amortization.useful_life_years && 
+        if (yearsElapsed > 0 &&
+            yearsElapsed <= amortization.useful_life_years &&
             amortization.annual_amortization > 0) {
-          totalAnnualAmortization += amortization.annual_amortization
+          totalAnnualAmortization += ensureNumber((amortization as unknown as { annual_amortization: unknown }).annual_amortization)
         }
       }
 

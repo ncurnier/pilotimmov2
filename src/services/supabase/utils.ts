@@ -6,6 +6,7 @@ import { expenseService } from './expenses'
 import { notificationService } from './notifications'
 import type { UserProfile, DashboardData, DashboardStats } from './types'
 import logger from '../../utils/logger'
+import { ensureNumber } from './numeric'
 
 /**
  * Initialise le profil utilisateur s'il n'existe pas déjà
@@ -70,8 +71,8 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
     ])
 
     // Calculer les statistiques
-    const totalRevenue = revenues.reduce((sum, revenue) => sum + revenue.amount, 0)
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+    const totalRevenue = revenues.reduce((sum, revenue) => sum + ensureNumber((revenue as { amount: unknown }).amount), 0)
+    const totalExpenses = expenses.reduce((sum, expense) => sum + ensureNumber((expense as { amount: unknown }).amount), 0)
     const netProfit = totalRevenue - totalExpenses
 
     const stats: DashboardStats = {
