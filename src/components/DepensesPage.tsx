@@ -6,7 +6,7 @@ import { usePropertyContext } from '../hooks/usePropertyContext';
 import { useAuth } from '../hooks/useAuth';
 import { expenseService } from '../services/supabase/expenses';
 import { propertyService } from '../services/supabase/properties';
-import type { Property, Expense } from '../services/supabase/types';
+import type { Expense } from '../services/supabase/types';
 import logger from '../utils/logger';
 
 interface DepensesPageProps {
@@ -15,10 +15,17 @@ interface DepensesPageProps {
 
 export function DepensesPage({ onPageChange }: DepensesPageProps) {
   const { user } = useAuth();
-  const { currentPropertyId, injectPropertyId, canCreate, errors } = usePropertyContext();
+  const {
+    currentPropertyId,
+    injectPropertyId,
+    canCreate,
+    errors,
+    currentProperty,
+    setCurrentProperty,
+    clearCurrentProperty,
+  } = usePropertyContext();
   const [mode, setMode] = useState<'simple' | 'fec'>('fec');
   const [showHelp, setShowHelp] = useState(false);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,16 +54,20 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
       setError(null);
       
       // Charger seulement les données du bien sélectionné
-      const [propertiesData, expensesData] = await Promise.all([
+      const [propertyData, expensesData] = await Promise.all([
         propertyService.getById(currentPropertyId),
         expenseService.getByPropertyId(currentPropertyId)
       ]);
-      
-      setProperties(propertiesData ? [propertiesData] : []);
+
       setExpenses(expensesData);
-      logger.info('Expenses data loaded successfully', { 
-        properties: propertiesData ? 1 : 0, 
-        expenses: expensesData.length 
+      if (propertyData) {
+        setCurrentProperty(propertyData);
+      } else {
+        clearCurrentProperty();
+      }
+      logger.info('Expenses data loaded successfully', {
+        property: propertyData ? 1 : 0,
+        expenses: expensesData.length
       });
     } catch (error) {
       logger.error('Error loading expenses data:', error);
@@ -390,14 +401,13 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
               </thead>
               <tbody>
                 {expenses.map((expense) => {
-                  const property = properties.find(p => p.id === expense.property_id);
                   return (
                     <tr key={expense.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {new Date(expense.date).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {property?.address || 'Propriété supprimée'}
+                        {currentProperty?.address || 'Propriété sélectionnée'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">{expense.description}</td>
                       <td className="px-6 py-4">
@@ -473,27 +483,21 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
                     <p className="text-gray-600">Chargement...</p>
                   </td>
                 </tr>
-              ) : properties.length === 0 ? (
+              ) : !currentProperty ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center">
-                    <p className="text-gray-600 mb-4">Aucun bien enregistré</p>
-                    <button
-                      onClick={() => onPageChange?.('properties')}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Ajouter votre premier bien
-                    </button>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-600">
+                    Aucun bien sélectionné
                   </td>
                 </tr>
               ) : (
-                properties.map((property) => {
-                  const expense = getPropertyExpenses(property.id);
-                  const isEditing = editingProperty === property.id;
-                  
+                (() => {
+                  const expense = getPropertyExpenses(currentProperty.id);
+                  const isEditing = editingProperty === currentProperty.id;
+
                   return (
-                    <tr key={property.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={currentProperty.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {property.address}
+                        {currentProperty.address}
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-sm text-gray-900">0 €</span>
@@ -511,7 +515,7 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
                             />
                             <span className="text-sm text-gray-600">€</span>
                             <button
-                              onClick={() => handleSaveExpense(property.id)}
+                              onClick={() => handleSaveExpense(currentProperty.id)}
                               className="text-green-600 hover:text-green-800 text-sm"
                             >
                               ✓
@@ -543,8 +547,8 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleEditExpense(property.id)}
+                        <button
+                          onClick={() => handleEditExpense(currentProperty.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
                           title="Modifier les dépenses"
                           disabled={isEditing}
@@ -554,7 +558,7 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
                       </td>
                     </tr>
                   );
-                })
+                })()
               )}
             </tbody>
           </table>

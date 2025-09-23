@@ -6,7 +6,7 @@ import { usePropertyContext } from '../hooks/usePropertyContext';
 import { useAuth } from '../hooks/useAuth';
 import { revenueService } from '../services/supabase/revenues';
 import { propertyService } from '../services/supabase/properties';
-import type { Property, Revenue } from '../services/supabase/types';
+import type { Revenue } from '../services/supabase/types';
 import logger from '../utils/logger';
 
 interface RecettesPageProps {
@@ -15,10 +15,17 @@ interface RecettesPageProps {
 
 export function RecettesPage({ onPageChange }: RecettesPageProps) {
   const { user } = useAuth();
-  const { currentPropertyId, injectPropertyId, canCreate, errors } = usePropertyContext();
+  const {
+    currentPropertyId,
+    injectPropertyId,
+    canCreate,
+    errors,
+    currentProperty,
+    setCurrentProperty,
+    clearCurrentProperty,
+  } = usePropertyContext();
   const [mode, setMode] = useState<'simple' | 'fec'>('fec');
   const [showHelp, setShowHelp] = useState(false);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,16 +53,20 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
       setError(null);
       
       // Charger seulement les données du bien sélectionné
-      const [propertiesData, revenuesData] = await Promise.all([
+      const [propertyData, revenuesData] = await Promise.all([
         propertyService.getById(currentPropertyId),
         revenueService.getByPropertyId(currentPropertyId)
       ]);
-      
-      setProperties(propertiesData ? [propertiesData] : []);
+
       setRevenues(revenuesData);
-      logger.info('Recettes data loaded successfully', { 
-        properties: propertiesData ? 1 : 0, 
-        revenues: revenuesData.length 
+      if (propertyData) {
+        setCurrentProperty(propertyData);
+      } else {
+        clearCurrentProperty();
+      }
+      logger.info('Recettes data loaded successfully', {
+        property: propertyData ? 1 : 0,
+        revenues: revenuesData.length
       });
     } catch (error) {
       logger.error('Error loading recettes data:', error);
@@ -369,14 +380,13 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
               </thead>
               <tbody>
                 {revenues.map((revenue) => {
-                  const property = properties.find(p => p.id === revenue.property_id);
                   return (
                     <tr key={revenue.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {new Date(revenue.date).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {property?.address || 'Propriété supprimée'}
+                        {currentProperty?.address || 'Propriété sélectionnée'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">{revenue.description}</td>
                       <td className="px-6 py-4">
@@ -445,27 +455,21 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
                     <p className="text-gray-600">Chargement...</p>
                   </td>
                 </tr>
-              ) : properties.length === 0 ? (
+              ) : !currentProperty ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center">
-                    <p className="text-gray-600 mb-4">Aucun bien enregistré</p>
-                    <button
-                      onClick={() => onPageChange?.('properties')}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Ajouter votre premier bien
-                    </button>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-600">
+                    Aucun bien sélectionné
                   </td>
                 </tr>
               ) : (
-                properties.map((property) => {
-                  const revenue = getPropertyRevenue(property.id);
-                  const isEditing = editingProperty === property.id;
-                  
+                (() => {
+                  const revenue = getPropertyRevenue(currentProperty.id);
+                  const isEditing = editingProperty === currentProperty.id;
+
                   return (
-                    <tr key={property.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={currentProperty.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {property.address}
+                        {currentProperty.address}
                       </td>
                       <td className="px-6 py-4">
                         {isEditing ? (
@@ -480,7 +484,7 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
                             />
                             <span className="text-sm text-gray-600">€</span>
                             <button
-                              onClick={() => handleSaveRevenue(property.id)}
+                              onClick={() => handleSaveRevenue(currentProperty.id)}
                               className="text-green-600 hover:text-green-800 text-sm"
                             >
                               ✓
@@ -515,8 +519,8 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleEditRevenue(property.id)}
+                        <button
+                          onClick={() => handleEditRevenue(currentProperty.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
                           title="Modifier les recettes"
                           disabled={isEditing}
@@ -526,7 +530,7 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
                       </td>
                     </tr>
                   );
-                })
+                })()
               )}
             </tbody>
           </table>

@@ -5,7 +5,7 @@ import { usePropertyContext } from '../hooks/usePropertyContext';
 import { useAuth } from '../hooks/useAuth';
 import { tenantService } from '../services/supabase/tenants';
 import { propertyService } from '../services/supabase/properties';
-import type { Tenant, Property } from '../services/supabase/types';
+import type { Tenant } from '../services/supabase/types';
 import logger from '../utils/logger';
 
 interface TenantsPageProps {
@@ -14,9 +14,16 @@ interface TenantsPageProps {
 
 export function TenantsPage({ onPageChange }: TenantsPageProps) {
   const { user } = useAuth();
-  const { currentPropertyId, injectPropertyId, canCreate, errors } = usePropertyContext();
+  const {
+    currentPropertyId,
+    injectPropertyId,
+    canCreate,
+    errors,
+    currentProperty,
+    setCurrentProperty,
+    clearCurrentProperty,
+  } = usePropertyContext();
   const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -47,16 +54,20 @@ export function TenantsPage({ onPageChange }: TenantsPageProps) {
       setError(null);
       
       // Charger seulement les données du bien sélectionné
-      const [tenantsData, propertiesData] = await Promise.all([
+      const [tenantsData, propertyData] = await Promise.all([
         tenantService.getByPropertyId(currentPropertyId),
         propertyService.getById(currentPropertyId)
       ]);
-      
+
       setTenants(tenantsData);
-      setProperties(propertiesData ? [propertiesData] : []);
-      logger.info('Tenants data loaded successfully', { 
-        tenants: tenantsData.length, 
-        properties: propertiesData ? 1 : 0
+      if (propertyData) {
+        setCurrentProperty(propertyData);
+      } else {
+        clearCurrentProperty();
+      }
+      logger.info('Tenants data loaded successfully', {
+        tenants: tenantsData.length,
+        property: propertyData ? 1 : 0
       });
     } catch (error) {
       logger.error('Error loading tenants data:', error);
@@ -258,7 +269,7 @@ export function TenantsPage({ onPageChange }: TenantsPageProps) {
                   <div className="flex items-center space-x-2">
                     <MapPin className="h-4 w-4 text-blue-600" />
                     <span className="text-sm font-medium text-blue-900">
-                      Bien sélectionné: {properties[0]?.address}
+                      Bien sélectionné: {currentProperty?.address || '—'}
                     </span>
                   </div>
                 </div>

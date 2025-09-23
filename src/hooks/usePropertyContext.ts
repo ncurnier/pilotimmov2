@@ -8,7 +8,14 @@ import logger from '../utils/logger';
  * Filtre automatiquement les listes par property_id
  */
 export function usePropertyContext() {
-  const { currentPropertyId, isPropertySelected, currentProperty } = useCurrentProperty();
+  const {
+    currentPropertyId,
+    isPropertySelected,
+    currentProperty,
+    setCurrentProperty,
+    setCurrentPropertyId,
+    clearCurrentProperty,
+  } = useCurrentProperty();
 
   // Injecter property_id dans les données de création
   const injectPropertyId = useCallback(<T extends Record<string, any>>(data: T): T & { property_id: string } => {
@@ -69,6 +76,9 @@ export function usePropertyContext() {
     currentPropertyId,
     isPropertySelected,
     currentProperty,
+    setCurrentProperty,
+    setCurrentPropertyId,
+    clearCurrentProperty,
     
     // Utilitaires
     injectPropertyId,
