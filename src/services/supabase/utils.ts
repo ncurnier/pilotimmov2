@@ -142,3 +142,4 @@ export function formatCurrency(amount: number, currency: string = 'EUR'): string
 export function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('fr-FR')
 }
+

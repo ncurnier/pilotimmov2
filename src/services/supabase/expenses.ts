@@ -1,6 +1,13 @@
 import { supabase } from '../../config/supabase'
 import type { Expense } from './types'
 import logger from '../../utils/logger'
+import {
+  convertArrayNumericFields,
+  convertNullableNumericFields,
+  convertNumericFields
+} from './numeric'
+
+const EXPENSE_NUMERIC_FIELDS: (keyof Expense)[] = ['amount']
 
 export const expenseService = {
   async create(expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>): Promise<Expense> {
@@ -14,7 +21,7 @@ export const expenseService = {
       if (error) throw error
       
       logger.info('Expense created successfully', { id: data.id })
-      return data
+      return convertNumericFields(data, EXPENSE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to create expense', error)
       throw error
@@ -30,7 +37,7 @@ export const expenseService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return convertNullableNumericFields(data, EXPENSE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get expense by ID', error)
       throw error
@@ -46,7 +53,7 @@ export const expenseService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, EXPENSE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get expenses by property ID', error)
       throw error
@@ -62,7 +69,7 @@ export const expenseService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, EXPENSE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get expenses by user ID', error)
       throw error

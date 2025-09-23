@@ -1,6 +1,17 @@
 import { supabase } from '../../config/supabase'
 import type { Declaration } from './types'
 import logger from '../../utils/logger'
+import {
+  convertArrayNumericFields,
+  convertNullableNumericFields,
+  convertNumericFields
+} from './numeric'
+
+const DECLARATION_NUMERIC_FIELDS: (keyof Declaration)[] = [
+  'total_revenue',
+  'total_expenses',
+  'net_result'
+]
 
 export const declarationService = {
   async create(declarationData: Omit<Declaration, 'id' | 'created_at' | 'updated_at'>): Promise<Declaration> {
@@ -14,7 +25,7 @@ export const declarationService = {
       if (error) throw error
       
       logger.info('Declaration created successfully', { id: data.id })
-      return data
+      return convertNumericFields(data, DECLARATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to create declaration', error)
       throw error
@@ -30,7 +41,7 @@ export const declarationService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return convertNullableNumericFields(data, DECLARATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get declaration by ID', error)
       throw error
@@ -46,7 +57,7 @@ export const declarationService = {
         .order('year', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, DECLARATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get declarations by user ID', error)
       throw error

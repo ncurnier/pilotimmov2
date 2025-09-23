@@ -1,6 +1,13 @@
 import { supabase } from '../../config/supabase'
 import type { Revenue } from './types'
 import logger from '../../utils/logger'
+import {
+  convertArrayNumericFields,
+  convertNullableNumericFields,
+  convertNumericFields
+} from './numeric'
+
+const REVENUE_NUMERIC_FIELDS: (keyof Revenue)[] = ['amount']
 
 export const revenueService = {
   async create(revenueData: Omit<Revenue, 'id' | 'created_at' | 'updated_at'>): Promise<Revenue> {
@@ -14,7 +21,7 @@ export const revenueService = {
       if (error) throw error
       
       logger.info('Revenue created successfully', { id: data.id })
-      return data
+      return convertNumericFields(data, REVENUE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to create revenue', error)
       throw error
@@ -30,7 +37,7 @@ export const revenueService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return convertNullableNumericFields(data, REVENUE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get revenue by ID', error)
       throw error
@@ -46,7 +53,7 @@ export const revenueService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, REVENUE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get revenues by property ID', error)
       throw error
@@ -62,7 +69,7 @@ export const revenueService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, REVENUE_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get revenues by user ID', error)
       throw error

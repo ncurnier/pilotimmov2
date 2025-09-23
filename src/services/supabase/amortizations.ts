@@ -1,6 +1,18 @@
 import { supabase } from '../../config/supabase'
 import type { Amortization } from './types'
 import logger from '../../utils/logger'
+import {
+  convertArrayNumericFields,
+  convertNullableNumericFields,
+  convertNumericFields
+} from './numeric'
+
+const AMORTIZATION_NUMERIC_FIELDS: (keyof Amortization)[] = [
+  'purchase_amount',
+  'annual_amortization',
+  'accumulated_amortization',
+  'remaining_value'
+]
 
 export const amortizationService = {
   async create(amortizationData: Omit<Amortization, 'id' | 'created_at' | 'updated_at'>): Promise<Amortization> {
@@ -24,7 +36,7 @@ export const amortizationService = {
       if (error) throw error
       
       logger.info('Amortization created successfully', { id: data.id })
-      return data
+      return convertNumericFields(data, AMORTIZATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to create amortization', error)
       throw error
@@ -40,7 +52,7 @@ export const amortizationService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return convertNullableNumericFields(data, AMORTIZATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get amortization by ID', error)
       throw error
@@ -56,7 +68,7 @@ export const amortizationService = {
         .order('purchase_date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, AMORTIZATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get amortizations by user ID', error)
       throw error
@@ -72,7 +84,7 @@ export const amortizationService = {
         .order('purchase_date', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, AMORTIZATION_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get amortizations by property ID', error)
       throw error
@@ -133,7 +145,10 @@ export const amortizationService = {
 
       let totalAnnualAmortization = 0
 
-      for (const amortization of data || []) {
+      for (const amortization of convertArrayNumericFields(
+        data,
+        AMORTIZATION_NUMERIC_FIELDS
+      )) {
         const purchaseYear = new Date(amortization.purchase_date).getFullYear()
         const yearsElapsed = year - purchaseYear + 1
         
