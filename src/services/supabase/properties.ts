@@ -1,6 +1,13 @@
 import { supabase } from '../../config/supabase'
 import type { Property } from './types'
 import logger from '../../utils/logger'
+import {
+  convertArrayNumericFields,
+  convertNullableNumericFields,
+  convertNumericFields
+} from './numeric'
+
+const PROPERTY_NUMERIC_FIELDS: (keyof Property)[] = ['monthly_rent']
 
 export const propertyService = {
   async create(propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>): Promise<Property> {
@@ -14,7 +21,7 @@ export const propertyService = {
       if (error) throw error
       
       logger.info('Property created successfully', { id: data.id })
-      return data
+      return convertNumericFields(data, PROPERTY_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to create property', error)
       throw error
@@ -30,7 +37,7 @@ export const propertyService = {
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return convertNullableNumericFields(data, PROPERTY_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get property by ID', error)
       throw error
@@ -46,7 +53,7 @@ export const propertyService = {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return convertArrayNumericFields(data, PROPERTY_NUMERIC_FIELDS)
     } catch (error) {
       logger.error('Failed to get properties by user ID', error)
       throw error
