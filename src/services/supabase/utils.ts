@@ -7,6 +7,11 @@ import { notificationService } from './notifications'
 import type { UserProfile, DashboardData, DashboardStats } from './types'
 import logger from '../../utils/logger'
 
+const ensureNumber = (value: unknown): number => {
+  const numericValue = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(numericValue) ? numericValue : 0
+}
+
 /**
  * Initialise le profil utilisateur s'il n'existe pas déjà
  */
@@ -70,8 +75,11 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
     ])
 
     // Calculer les statistiques
-    const totalRevenue = revenues.reduce((sum, revenue) => sum + revenue.amount, 0)
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+    const totalRevenue = revenues.reduce((sum, revenue) => sum + ensureNumber(revenue.amount), 0)
+    const totalExpenses = expenses.reduce(
+      (sum, expense) => sum + ensureNumber(expense.amount),
+      0
+    )
     const netProfit = totalRevenue - totalExpenses
 
     const stats: DashboardStats = {

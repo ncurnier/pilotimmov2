@@ -10,6 +10,11 @@ import type { Declaration, Property, Revenue, Expense } from '../services/supaba
 import { formatDate, formatCurrency } from '../services/supabase/utils';
 import logger from '../utils/logger';
 
+const ensureNumber = (value: unknown): number => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
 interface DeclarationsPageProps {
   onPageChange?: (page: string) => void;
 }
@@ -73,8 +78,8 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
     const yearRevenues = revenues.filter(r => new Date(r.date).getFullYear() === year);
     const yearExpenses = expenses.filter(e => new Date(e.date).getFullYear() === year && e.deductible);
     
-    const totalRevenue = yearRevenues.reduce((sum, r) => sum + r.amount, 0);
-    const totalExpenses = yearExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalRevenue = yearRevenues.reduce((sum, r) => sum + ensureNumber(r.amount), 0);
+    const totalExpenses = yearExpenses.reduce((sum, e) => sum + ensureNumber(e.amount), 0);
     const netResult = totalRevenue - totalExpenses;
     
     return { totalRevenue, totalExpenses, netResult };
