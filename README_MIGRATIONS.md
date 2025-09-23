@@ -2,6 +2,12 @@
 
 ## 🎯 Décisions techniques
 
+### Correction UUID - Migration 20250125000001
+- **Problème résolu** : Remplacement des fonctions `uid()` inexistantes par `gen_random_uuid()`
+- **Extension requise** : `pgcrypto` activée automatiquement
+- **Impact** : Aucun sur les données existantes, améliore la compatibilité PostgreSQL
+- **Rollback** : Script disponible dans `sql/rollback_uuid_fix.sql` (non recommandé)
+
 ### Génération d'IDs
 - **Extension choisie** : `pgcrypto` avec `gen_random_uuid()`
 - **Raison** : Plus léger que `uuid-ossp`, intégré nativement dans Postgres moderne
@@ -22,11 +28,17 @@
 SELECT version();
 
 -- Vérifier les extensions disponibles
-SELECT * FROM pg_available_extensions WHERE name IN ('pgcrypto', 'uuid-ossp');
+SELECT * FROM pg_available_extensions WHERE name = 'pgcrypto';
+
+-- Vérifier que pgcrypto est activée
+SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
 ```
 
 ### 2. Ordre d'exécution des migrations
 ```bash
+# 0. Correction UUID (nouvelle migration prioritaire)
+psql -f supabase/migrations/20250125000001_fix_uid_to_gen_random_uuid.sql
+
 # 1. Correction des fonctions uid() existantes
 psql -f supabase/migrations/fix_uid_functions.sql
 
@@ -52,6 +64,9 @@ DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
 ```
 
 ### 4. Validation post-déploiement
+- [ ] Extension `pgcrypto` activée
+- [ ] Script de test UUID exécuté avec succès (`sql/smoke_uuid_test.sql`)
+- [ ] Aucune fonction `uid()` problématique restante
 - [ ] Extensions `pgcrypto` activée
 - [ ] Toutes les tables ont RLS activé
 - [ ] Policies fonctionnelles (test avec différents utilisateurs)
@@ -59,7 +74,28 @@ DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
 - [ ] Calculs d'amortissement corrects
 - [ ] Index créés et performants
 
+### 5. Tests de validation
+```bash
+# Test complet UUID
+psql -f sql/smoke_uuid_test.sql
+
+# Test rapide de génération UUID
+psql -c "SELECT gen_random_uuid() as test_uuid;"
+
+# Vérification des DEFAULT
+psql -c "SELECT table_name, column_default FROM information_schema.columns WHERE column_name = 'id' AND data_type = 'uuid';"
+```
+
 ## 🔄 Plan de rollback
+
+### Rollback UUID (non recommandé)
+```sql
+-- Seulement en cas d'urgence absolue
+psql -f sql/rollback_uuid_fix.sql
+
+-- Alternative : utiliser gen_random_uuid() manuellement
+INSERT INTO table (id, ...) VALUES (gen_random_uuid(), ...);
+```
 
 ### Rollback complet (si problème majeur)
 ```sql
@@ -128,6 +164,25 @@ WHERE tablename IN ('users', 'properties', 'revenues', 'expenses', 'declarations
 
 ### Erreurs courantes
 
+#### `function uid() does not exist`
+```sql
+-- Solution : Exécuter la migration de correction
+psql -f supabase/migrations/20250125000001_fix_uid_to_gen_random_uuid.sql
+
+-- Vérification
+SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
+```
+
+#### `extension "pgcrypto" is not available`
+```sql
+-- Vérifier les extensions disponibles
+SELECT * FROM pg_available_extensions WHERE name = 'pgcrypto';
+
+-- Si pgcrypto n'est pas disponible, utiliser uuid-ossp en alternative
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Puis remplacer gen_random_uuid() par uuid_generate_v4() dans les migrations
+```
+
 #### `division by zero` dans les calculs d'amortissement
 ```sql
 -- Vérifier les enregistrements avec useful_life_years <= 0
@@ -143,16 +198,6 @@ UPDATE amortizations SET useful_life_years = 10 WHERE useful_life_years <= 0 AND
 SELECT * FROM pg_policies WHERE qual LIKE '%uid()%' OR with_check LIKE '%uid()%';
 
 -- Remplacer par auth.uid()::text
-```
-
-#### `extension "pgcrypto" is not available`
-```sql
--- Vérifier les extensions disponibles
-SELECT * FROM pg_available_extensions WHERE name = 'pgcrypto';
-
--- Alternative avec uuid-ossp
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
--- Puis remplacer gen_random_uuid() par uuid_generate_v4()
 ```
 
 #### `permission denied for table`
@@ -201,12 +246,18 @@ WHERE tablename IN ('properties', 'tenants', 'revenues', 'expenses', 'amortizati
 
 En cas de problème :
 1. Consulter les logs Supabase Dashboard
-2. Exécuter le script de test `test_migrations.sql`
+2. Exécuter le script de test `sql/smoke_uuid_test.sql`
 3. Vérifier la checklist post-déploiement
 4. Utiliser le plan de rollback si nécessaire
+
+### Problèmes UUID spécifiques
+- **Erreur uid()** : Exécuter la migration 20250125000001
+- **UUIDs non générés** : Vérifier que pgcrypto est activée
+- **Performance** : gen_random_uuid() est plus rapide que uuid-ossp
 
 ## 📚 Références
 
 - [Supabase RLS Documentation](https://supabase.com/docs/guides/auth/row-level-security)
 - [PostgreSQL UUID Functions](https://www.postgresql.org/docs/current/functions-uuid.html)
+- [PostgreSQL pgcrypto Extension](https://www.postgresql.org/docs/current/pgcrypto.html)
 - [Règles LMNP Amortissements](https://www.service-public.fr/professionnels-entreprises/vosdroits/F31973)
