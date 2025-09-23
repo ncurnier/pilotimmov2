@@ -9,6 +9,11 @@ import { propertyService } from '../services/supabase/properties';
 import type { Revenue } from '../services/supabase/types';
 import logger from '../utils/logger';
 
+const ensureNumber = (value: unknown): number => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
 interface RecettesPageProps {
   onPageChange?: (page: string) => void;
 }
@@ -79,7 +84,7 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
   const getPropertyRevenue = (propertyId: string) => {
     return revenues
       .filter(revenue => revenue.property_id === propertyId)
-      .reduce((sum, revenue) => sum + revenue.amount, 0);
+      .reduce((sum, revenue) => sum + ensureNumber(revenue.amount), 0);
   };
 
   const handleEditRevenue = (propertyId: string) => {

@@ -8,6 +8,11 @@ import { propertyService } from '../services/supabase/properties';
 import type { Amortization } from '../services/supabase/types';
 import logger from '../utils/logger';
 
+const ensureNumber = (value: unknown): number => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
 interface AmortissementsPageProps {
   onPageChange?: (page: string) => void;
 }
@@ -578,7 +583,11 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
               <h3 className="font-semibold text-gray-900">Total des équipements</h3>
             </div>
             <div className="text-2xl font-bold text-blue-600">
-              {amortizations.reduce((sum, a) => sum + a.purchase_amount, 0).toLocaleString()} €
+              {
+                amortizations
+                  .reduce((sum, amortization) => sum + ensureNumber(amortization.purchase_amount), 0)
+                  .toLocaleString()
+              } €
             </div>
             <p className="text-sm text-gray-600">Valeur d'achat totale</p>
           </div>
@@ -589,7 +598,11 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
               <h3 className="font-semibold text-gray-900">Amortissement annuel</h3>
             </div>
             <div className="text-2xl font-bold text-green-600">
-              {amortizations.reduce((sum, a) => sum + a.annual_amortization, 0).toLocaleString()} €
+              {
+                amortizations
+                  .reduce((sum, amortization) => sum + ensureNumber(amortization.annual_amortization), 0)
+                  .toLocaleString()
+              } €
             </div>
             <p className="text-sm text-gray-600">Déduction fiscale annuelle</p>
           </div>
@@ -600,7 +613,11 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
               <h3 className="font-semibold text-gray-900">Valeur résiduelle</h3>
             </div>
             <div className="text-2xl font-bold text-purple-600">
-              {amortizations.reduce((sum, a) => sum + a.remaining_value, 0).toLocaleString()} €
+              {
+                amortizations
+                  .reduce((sum, amortization) => sum + ensureNumber(amortization.remaining_value), 0)
+                  .toLocaleString()
+              } €
             </div>
             <p className="text-sm text-gray-600">Valeur restante à amortir</p>
           </div>

@@ -9,6 +9,11 @@ import { propertyService } from '../services/supabase/properties';
 import type { Expense } from '../services/supabase/types';
 import logger from '../utils/logger';
 
+const ensureNumber = (value: unknown): number => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
 interface DepensesPageProps {
   onPageChange?: (page: string) => void;
 }
@@ -80,7 +85,7 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
   const getPropertyExpenses = (propertyId: string) => {
     return expenses
       .filter(expense => expense.property_id === propertyId)
-      .reduce((sum, expense) => sum + expense.amount, 0);
+      .reduce((sum, expense) => sum + ensureNumber(expense.amount), 0);
   };
 
   const handleEditExpense = (propertyId: string) => {
