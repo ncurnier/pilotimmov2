@@ -1,5 +1,4 @@
 import { supabase } from '../../config/supabase'
-import { usePropertyContext } from '../../hooks/usePropertyContext'
 import type { Revenue } from './types'
 import logger from '../../utils/logger'
 
