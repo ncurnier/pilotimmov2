@@ -5,7 +5,7 @@ import { usePropertyContext } from '../hooks/usePropertyContext';
 import { useAuth } from '../hooks/useAuth';
 import { amortizationService } from '../services/supabase/amortizations';
 import { propertyService } from '../services/supabase/properties';
-import type { Amortization, Property } from '../services/supabase/types';
+import type { Amortization } from '../services/supabase/types';
 import logger from '../utils/logger';
 
 interface AmortissementsPageProps {
@@ -14,9 +14,16 @@ interface AmortissementsPageProps {
 
 export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
   const { user } = useAuth();
-  const { currentPropertyId, injectPropertyId, canCreate, errors } = usePropertyContext();
+  const {
+    currentPropertyId,
+    injectPropertyId,
+    canCreate,
+    errors,
+    currentProperty,
+    setCurrentProperty,
+    clearCurrentProperty,
+  } = usePropertyContext();
   const [amortizations, setAmortizations] = useState<Amortization[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -44,16 +51,20 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
       setError(null);
       
       // Charger seulement les données du bien sélectionné
-      const [amortizationsData, propertiesData] = await Promise.all([
+      const [amortizationsData, propertyData] = await Promise.all([
         amortizationService.getByPropertyId(currentPropertyId),
         propertyService.getById(currentPropertyId)
       ]);
-      
+
       setAmortizations(amortizationsData);
-      setProperties(propertiesData ? [propertiesData] : []);
-      logger.info('Amortizations data loaded successfully', { 
-        amortizations: amortizationsData.length, 
-        properties: propertiesData ? 1 : 0
+      if (propertyData) {
+        setCurrentProperty(propertyData);
+      } else {
+        clearCurrentProperty();
+      }
+      logger.info('Amortizations data loaded successfully', {
+        amortizations: amortizationsData.length,
+        property: propertyData ? 1 : 0
       });
     } catch (error) {
       logger.error('Error loading amortizations data:', error);
@@ -305,7 +316,7 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
                 <div className="flex items-center space-x-2">
                   <Calculator className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-900">
-                    Bien sélectionné: {properties[0]?.address}
+                    Bien sélectionné: {currentProperty?.address || '—'}
                   </span>
                 </div>
               </div>
@@ -502,7 +513,7 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {properties[0]?.address || 'Bien sélectionné'}
+                        {currentProperty?.address || 'Bien sélectionné'}
                       </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
