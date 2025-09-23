@@ -28,6 +28,70 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 Ces variables sont utilisées dans `src/config/supabase.ts` pour initialiser Supabase.
 
+## Tests
+
+### Tests unitaires (Vitest)
+```bash
+# Exécuter tous les tests
+npm test
+
+# Mode watch (développement)
+npm run test:watch
+```
+
+### Tests SQL (Smoke tests)
+```bash
+# Définir la base de test
+export DATABASE_URL="postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres"
+
+# Exécuter les smoke tests
+npm run test:sql
+```
+
+### Tests complets (CI)
+```bash
+# Tous les tests (unit + SQL)
+npm run ci:test
+```
+
+### Configuration CI/CD
+
+Pour activer les tests en CI, définissez ces secrets GitHub :
+- `DATABASE_URL_TEST` : URL de votre base Supabase de test
+
+Les tests s'exécutent automatiquement sur chaque push/PR vers `main` ou `develop`.
+
+### Tests unitaires (Vitest)
+```bash
+# Exécuter tous les tests
+npm test
+
+# Mode watch (développement)
+npm run test:watch
+```
+
+### Tests SQL (Smoke tests)
+```bash
+# Définir la base de test
+export DATABASE_URL="postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres"
+
+# Exécuter les smoke tests
+npm run test:sql
+```
+
+### Tests complets (CI)
+```bash
+# Tous les tests (unit + SQL)
+npm run ci:test
+```
+
+### Configuration CI/CD
+
+Pour activer les tests en CI, définissez ces secrets GitHub :
+- `DATABASE_URL_TEST` : URL de votre base Supabase de test
+
+Les tests s'exécutent automatiquement sur chaque push/PR vers `main` ou `develop`.
+
 ## Structure de la base de données
 
 ### Tables créées :
