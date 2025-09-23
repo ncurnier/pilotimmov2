@@ -1,0 +1,60 @@
+@import '@fontsource/montserrat/400.css';
+@import '@fontsource/montserrat/600.css';
+@import '@fontsource/montserrat/700.css';
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/700.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #F8F8F8;
+  --bg-sidebar: #3D3D3D;
+  --text-primary: #2C2C2C;
+  --text-secondary: #FFFFFF;
+  --accent-blue: #0A2463;
+  --accent-gold: #B89551;
+  --accent-green: #3A5A40;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --border-radius: 8px;
+  --border-light: #E0E0E0;
+  --bg-card: #FFFFFF;
+  --bg-table-even: #FAFAFA;
+  --bg-table-header: #F0F0F0;
+}
+
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.transition-smooth {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-gold);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9d7d42;
+}

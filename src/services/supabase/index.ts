@@ -1,0 +1,21 @@
+// Export all Supabase services
+export * from './users'
+export * from './properties'
+export * from './revenues'
+export * from './expenses'
+export * from './declarations'
+export * from './notifications'
+export * from './tenants'
+export * from './amortizations'
+export * from './types'
+export * from './utils'
+
+// Export commonly used services as default exports
+export { userService } from './users'
+export { propertyService } from './properties'
+export { revenueService } from './revenues'
+export { expenseService } from './expenses'
+export { declarationService } from './declarations'
+export { notificationService } from './notifications'
+export { tenantService } from './tenants'
+export { amortizationService } from './amortizations'
