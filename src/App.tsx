@@ -16,6 +16,8 @@ import { CommunautePage } from './components/CommunautePage';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import logger from './utils/logger';
+import NewAmortizationForm from './features/amortizations/NewAmortizationForm';
+
 
 function App() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -109,6 +111,9 @@ function App() {
             </div>
           </div>
         );
+      case 'amortissements_new': // ⬅️ AJOUT
+        return <NewAmortizationForm />;
+
       default:
         return <Dashboard onPageChange={setCurrentPage} />;
     }
