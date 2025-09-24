@@ -8,6 +8,27 @@
   4. Cas limites et erreurs
 */
 
+-- Préparer une propriété de test valide (UUID déterministe)
+INSERT INTO properties (
+  id,
+  user_id,
+  address,
+  start_date,
+  monthly_rent,
+  status,
+  type
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'test-user-id',
+  'Test property for amortization checks',
+  CURRENT_DATE,
+  0,
+  'active',
+  'apartment'
+)
+ON CONFLICT (id) DO NOTHING;
+
 -- Test 1: Vérification des fonctions
 SELECT 'Test 1: Fonction amortization_annual' as test_name;
 
@@ -51,7 +72,7 @@ BEGIN
       user_id, property_id, item_name, category,
       purchase_date, purchase_amount, useful_life_years
     ) VALUES (
-      'test-user-id', 'test-property-id', 'Test Item', 'mobilier',
+      'test-user-id', '00000000-0000-0000-0000-000000000001', 'Test Item', 'mobilier',
       CURRENT_DATE, 1000, 0
     );
     RAISE NOTICE 'ERREUR: Insertion avec years=0 devrait échouer';
@@ -72,7 +93,7 @@ INSERT INTO amortizations (
   purchase_date, purchase_amount, useful_life_years,
   accumulated_amortization, status
 ) VALUES (
-  'test-user-id', 'test-property-id', 'Test Item Valid', 'mobilier',
+  'test-user-id', '00000000-0000-0000-0000-000000000001', 'Test Item Valid', 'mobilier',
   CURRENT_DATE, 1000, 10, 0, 'active'
 ) RETURNING 
   item_name,
@@ -164,11 +185,11 @@ INSERT INTO amortizations (
   user_id, property_id, item_name, category,
   purchase_date, purchase_amount, useful_life_years, status
 ) VALUES 
-  ('test-user-id', 'test-property-id', 'Canapé', 'mobilier', CURRENT_DATE, 800, 10, 'active'),
-  ('test-user-id', 'test-property-id', 'Réfrigérateur', 'electromenager', CURRENT_DATE, 600, 5, 'active'),
-  ('test-user-id', 'test-property-id', 'Ordinateur', 'informatique', CURRENT_DATE, 1200, 3, 'active'),
-  ('test-user-id', 'test-property-id', 'Cuisine équipée', 'amenagement', CURRENT_DATE, 5000, 15, 'active'),
-  ('test-user-id', 'test-property-id', 'Rénovation salle de bain', 'travaux', CURRENT_DATE, 8000, 20, 'active')
+  ('test-user-id', '00000000-0000-0000-0000-000000000001', 'Canapé', 'mobilier', CURRENT_DATE, 800, 10, 'active'),
+  ('test-user-id', '00000000-0000-0000-0000-000000000001', 'Réfrigérateur', 'electromenager', CURRENT_DATE, 600, 5, 'active'),
+  ('test-user-id', '00000000-0000-0000-0000-000000000001', 'Ordinateur', 'informatique', CURRENT_DATE, 1200, 3, 'active'),
+  ('test-user-id', '00000000-0000-0000-0000-000000000001', 'Cuisine équipée', 'amenagement', CURRENT_DATE, 5000, 15, 'active'),
+  ('test-user-id', '00000000-0000-0000-0000-000000000001', 'Rénovation salle de bain', 'travaux', CURRENT_DATE, 8000, 20, 'active')
 ON CONFLICT DO NOTHING;
 
 -- Vérifier les calculs pour chaque catégorie
@@ -185,5 +206,6 @@ ORDER BY category, item_name;
 
 -- Nettoyage des données de test
 DELETE FROM amortizations WHERE user_id = 'test-user-id';
+DELETE FROM properties WHERE id = '00000000-0000-0000-0000-000000000001';
 
 SELECT 'Tests terminés avec succès!' as final_result;

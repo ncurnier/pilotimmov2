@@ -120,31 +120,31 @@ DO $$
 BEGIN
   -- Remove any records with test placeholders in UUID columns
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'amortizations') THEN
-    DELETE FROM amortizations 
-    WHERE user_id = 'test-user-id' 
-       OR property_id = 'test-property-id'
+    DELETE FROM amortizations
+    WHERE user_id = 'test-user-id'
+       OR property_id::text = 'test-property-id'
        OR useful_life_years = 0;
     RAISE NOTICE '✅ Cleaned up invalid amortizations data';
   END IF;
 
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'revenues') THEN
-    DELETE FROM revenues 
-    WHERE user_id = 'test-user-id' 
-       OR property_id = 'test-property-id';
+    DELETE FROM revenues
+    WHERE user_id = 'test-user-id'
+       OR property_id::text = 'test-property-id';
     RAISE NOTICE '✅ Cleaned up invalid revenues data';
   END IF;
 
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'expenses') THEN
-    DELETE FROM expenses 
-    WHERE user_id = 'test-user-id' 
-       OR property_id = 'test-property-id';
+    DELETE FROM expenses
+    WHERE user_id = 'test-user-id'
+       OR property_id::text = 'test-property-id';
     RAISE NOTICE '✅ Cleaned up invalid expenses data';
   END IF;
 
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tenants') THEN
-    DELETE FROM tenants 
-    WHERE user_id = 'test-user-id' 
-       OR property_id = 'test-property-id';
+    DELETE FROM tenants
+    WHERE user_id = 'test-user-id'
+       OR property_id::text = 'test-property-id';
     RAISE NOTICE '✅ Cleaned up invalid tenants data';
   END IF;
 

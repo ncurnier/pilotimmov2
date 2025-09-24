@@ -28,25 +28,25 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 DO $$
 BEGIN
   -- Supprimer les amortizations avec placeholders string ou useful_life_years <= 0
-  DELETE FROM public.amortizations 
-  WHERE user_id = 'test-user-id' 
-     OR property_id = 'test-property-id'
+  DELETE FROM public.amortizations
+  WHERE user_id = 'test-user-id'
+     OR property_id::text = 'test-property-id'
      OR useful_life_years <= 0;
   
   -- Supprimer les revenues avec placeholders string
-  DELETE FROM public.revenues 
-  WHERE user_id = 'test-user-id' 
-     OR property_id = 'test-property-id';
+  DELETE FROM public.revenues
+  WHERE user_id = 'test-user-id'
+     OR property_id::text = 'test-property-id';
   
   -- Supprimer les expenses avec placeholders string
-  DELETE FROM public.expenses 
-  WHERE user_id = 'test-user-id' 
-     OR property_id = 'test-property-id';
+  DELETE FROM public.expenses
+  WHERE user_id = 'test-user-id'
+     OR property_id::text = 'test-property-id';
   
   -- Supprimer les tenants avec placeholders string
-  DELETE FROM public.tenants 
-  WHERE user_id = 'test-user-id' 
-     OR property_id = 'test-property-id';
+  DELETE FROM public.tenants
+  WHERE user_id = 'test-user-id'
+     OR property_id::text = 'test-property-id';
   
   -- Supprimer les properties avec placeholders string
   DELETE FROM public.properties 
