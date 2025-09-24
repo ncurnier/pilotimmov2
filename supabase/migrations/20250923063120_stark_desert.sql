@@ -9,9 +9,10 @@
   5. Aucune fonction uid() problématique ne subsiste
 */
 
--- Configuration pour les tests
-\set ON_ERROR_STOP on
-\timing on
+-- Les tests sont exécutés dans le cadre des migrations Supabase qui arrêtent
+-- automatiquement l'exécution en cas d'erreur. Les méta-commandes psql comme
+-- `\set ON_ERROR_STOP on` ou `\timing on` ont été supprimées pour conserver
+-- une compatibilité totale avec l'exécution des migrations côté serveur.
 
 -- Header du test
 SELECT 

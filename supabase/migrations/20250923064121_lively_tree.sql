@@ -2,14 +2,13 @@
 -- SCRIPT DE SMOKE TEST - UUID + AMORTIZATION
 -- =============================================
 
-\echo '=== SMOKE TEST UUID + AMORTIZATION ==='
-\echo ''
+SELECT '=== SMOKE TEST UUID + AMORTIZATION ===' AS info;
 
 -- =============================================
 -- 1. VÉRIFICATIONS EXTENSIONS
 -- =============================================
 
-\echo '1. Vérification des extensions:'
+SELECT '1. Vérification des extensions:' AS info;
 SELECT 
     extname as extension_name,
     extversion as version
@@ -17,25 +16,23 @@ FROM pg_extension
 WHERE extname IN ('pgcrypto', 'uuid-ossp')
 ORDER BY extname;
 
-\echo ''
 
 -- =============================================
 -- 2. TEST GÉNÉRATION UUID
 -- =============================================
 
-\echo '2. Test génération UUID:'
+SELECT '2. Test génération UUID:' AS info;
 SELECT 
     'gen_random_uuid()' as function_name,
     gen_random_uuid() as generated_uuid,
     length(gen_random_uuid()::text) as uuid_length;
 
-\echo ''
 
 -- =============================================
 -- 3. VÉRIFICATION DEFAULT COLUMNS
 -- =============================================
 
-\echo '3. Vérification des DEFAULT sur colonnes id:'
+SELECT '3. Vérification des DEFAULT sur colonnes id:' AS info;
 SELECT 
     table_name,
     column_name,
@@ -47,13 +44,12 @@ AND column_name = 'id'
 AND data_type = 'uuid'
 ORDER BY table_name;
 
-\echo ''
 
 -- =============================================
 -- 4. RECHERCHE uid() PROBLÉMATIQUES
 -- =============================================
 
-\echo '4. Recherche de uid() problématiques (hors auth.uid()):'
+SELECT '4. Recherche de uid() problématiques (hors auth.uid()):' AS info;
 SELECT 
     table_name,
     column_name,
@@ -63,17 +59,15 @@ WHERE table_schema = 'public'
 AND column_default LIKE '%uid()%'
 AND column_default NOT LIKE '%auth.uid()%';
 
-\echo ''
 
 -- =============================================
 -- 5. TEST AMORTIZATION - DIVISION PAR ZÉRO
 -- =============================================
 
-\echo '5. Test amortization avec useful_life_years = 0 (ne doit pas planter):'
+SELECT '5. Test amortization avec useful_life_years = 0 (ne doit pas planter):' AS info;
 
--- Récupérer des IDs existants pour le test
-\set test_user_id (SELECT user_id FROM public.users LIMIT 1)
-\set test_property_id (SELECT id FROM public.properties LIMIT 1)
+-- Les identifiants nécessaires sont récupérés directement via les requêtes
+-- SELECT ci-dessous afin d'éviter l'usage de méta-commandes psql.
 
 -- Test avec years=0 -> ne doit PAS lever d'erreur division par zéro
 INSERT INTO public.amortizations (
@@ -103,13 +97,12 @@ RETURNING
     annual_expense,
     annual_amortization;
 
-\echo ''
 
 -- =============================================
 -- 6. TEST AMORTIZATION - CAS NORMAL
 -- =============================================
 
-\echo '6. Test amortization avec useful_life_years = 10 (cas normal):'
+SELECT '6. Test amortization avec useful_life_years = 10 (cas normal):' AS info;
 
 INSERT INTO public.amortizations (
     user_id, 
@@ -139,13 +132,12 @@ RETURNING
     annual_amortization,
     annual_expense;
 
-\echo ''
 
 -- =============================================
 -- 7. VÉRIFICATION CONTRAINTES
 -- =============================================
 
-\echo '7. Vérification des contraintes sur amortizations:'
+SELECT '7. Vérification des contraintes sur amortizations:' AS info;
 SELECT 
     conname as constraint_name,
     contype as constraint_type,
@@ -155,13 +147,12 @@ WHERE conrelid = 'public.amortizations'::regclass
 AND contype = 'c'  -- CHECK constraints
 ORDER BY conname;
 
-\echo ''
 
 -- =============================================
 -- 8. TEST INSERT SANS ID (AUTO-GÉNÉRATION)
 -- =============================================
 
-\echo '8. Test insert sans id explicite (auto-génération UUID):'
+SELECT '8. Test insert sans id explicite (auto-génération UUID):' AS info;
 
 -- Test sur table properties (doit générer un UUID automatiquement)
 INSERT INTO public.properties (
@@ -183,13 +174,12 @@ RETURNING
     address,
     'UUID auto-généré' as status;
 
-\echo ''
 
 -- =============================================
 -- 9. NETTOYAGE DES DONNÉES DE TEST
 -- =============================================
 
-\echo '9. Nettoyage des données de test:'
+SELECT '9. Nettoyage des données de test:' AS info;
 
 DELETE FROM public.amortizations 
 WHERE item_name LIKE 'SMOKE TEST%';
@@ -199,7 +189,5 @@ WHERE address LIKE 'SMOKE TEST%';
 
 SELECT 'Données de test nettoyées' as cleanup_status;
 
-\echo ''
-\echo '=== SMOKE TEST TERMINÉ ==='
-\echo ''
-\echo 'Si aucune erreur ci-dessus, la migration UUID + amortization est OK !'
+SELECT '=== SMOKE TEST TERMINÉ ===' AS info;
+SELECT 'Si aucune erreur ci-dessus, la migration UUID + amortization est OK !' AS info;

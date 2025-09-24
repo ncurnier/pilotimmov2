@@ -4,14 +4,13 @@
 -- Ce script valide que toutes les corrections UUID et amortization fonctionnent
 -- Exécution : psql -v ON_ERROR_STOP=1 -f sql/smoke.sql
 
-\echo '🧪 SMOKE TEST - Validation UUID et amortization'
-\echo ''
+SELECT '🧪 SMOKE TEST - Validation UUID et amortization' AS info;
 
 -- ============================================================================
 -- 1. VÉRIFICATION EXTENSION PGCRYPTO
 -- ============================================================================
 
-\echo '1️⃣  Vérification extension pgcrypto...'
+SELECT '1️⃣  Vérification extension pgcrypto...' AS info;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgcrypto') THEN
@@ -24,7 +23,7 @@ END $$;
 -- 2. VÉRIFICATION GÉNÉRATION UUID
 -- ============================================================================
 
-\echo '2️⃣  Test génération gen_random_uuid()...'
+SELECT '2️⃣  Test génération gen_random_uuid()...' AS info;
 DO $$
 DECLARE
   test_uuid uuid;
@@ -40,7 +39,7 @@ END $$;
 -- 3. VÉRIFICATION DEFAULT DES COLONNES ID
 -- ============================================================================
 
-\echo '3️⃣  Vérification DEFAULT des colonnes id uuid...'
+SELECT '3️⃣  Vérification DEFAULT des colonnes id uuid...' AS info;
 DO $$
 DECLARE
   table_record RECORD;
@@ -74,7 +73,7 @@ END $$;
 -- 4. VÉRIFICATION ABSENCE DE FONCTIONS UID() PROBLÉMATIQUES
 -- ============================================================================
 
-\echo '4️⃣  Vérification absence de uid() problématique...'
+SELECT '4️⃣  Vérification absence de uid() problématique...' AS info;
 DO $$
 DECLARE
   uid_functions text[];
@@ -97,7 +96,7 @@ END $$;
 -- 5. TEST CONTRAINTE AMORTIZATION
 -- ============================================================================
 
-\echo '5️⃣  Test contrainte useful_life_years >= 1...'
+SELECT '5️⃣  Test contrainte useful_life_years >= 1...' AS info;
 DO $$
 DECLARE
   test_user_id uuid;
@@ -141,7 +140,7 @@ END $$;
 -- 6. TEST INSERTION VALIDE AMORTIZATION
 -- ============================================================================
 
-\echo '6️⃣  Test insertion amortization valide...'
+SELECT '6️⃣  Test insertion amortization valide...' AS info;
 DO $$
 DECLARE
   test_user_id uuid;
@@ -191,7 +190,7 @@ END $$;
 -- 7. TEST AUTO-GÉNÉRATION UUID
 -- ============================================================================
 
-\echo '7️⃣  Test auto-génération UUID sur INSERT...'
+SELECT '7️⃣  Test auto-génération UUID sur INSERT...' AS info;
 DO $$
 DECLARE
   test_user_id uuid;
@@ -231,7 +230,7 @@ END $$;
 -- 8. VÉRIFICATION CONTRAINTES DE QUALITÉ
 -- ============================================================================
 
-\echo '8️⃣  Vérification contraintes de qualité...'
+SELECT '8️⃣  Vérification contraintes de qualité...' AS info;
 DO $$
 DECLARE
   constraint_count integer;
@@ -253,7 +252,7 @@ END $$;
 -- 9. NETTOYAGE FINAL
 -- ============================================================================
 
-\echo '9️⃣  Nettoyage final des données de test...'
+SELECT '9️⃣  Nettoyage final des données de test...' AS info;
 DO $$
 DECLARE
   cleanup_count integer;
@@ -278,13 +277,11 @@ BEGIN
   RAISE NOTICE '✅ Nettoyage final terminé';
 END $$;
 
-\echo ''
-\echo '🎯 SMOKE TEST TERMINÉ - Toutes les vérifications passées ✅'
-\echo '   - Extension pgcrypto activée'
-\echo '   - Génération gen_random_uuid() fonctionnelle'
-\echo '   - DEFAULT des colonnes id corrigés'
-\echo '   - Aucune fonction uid() problématique'
-\echo '   - Contraintes de qualité en place'
-\echo '   - Auto-génération UUID validée'
-\echo '   - Données invalides nettoyées'
-\echo ''
+SELECT '🎯 SMOKE TEST TERMINÉ - Toutes les vérifications passées ✅' AS info;
+SELECT '   - Extension pgcrypto activée' AS info;
+SELECT '   - Génération gen_random_uuid() fonctionnelle' AS info;
+SELECT '   - DEFAULT des colonnes id corrigés' AS info;
+SELECT '   - Aucune fonction uid() problématique' AS info;
+SELECT '   - Contraintes de qualité en place' AS info;
+SELECT '   - Auto-génération UUID validée' AS info;
+SELECT '   - Données invalides nettoyées' AS info;

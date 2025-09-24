@@ -1,10 +1,10 @@
 -- Script de smoke test : UUID + Amortization
 -- Vérifie que tous les garde-fous sont en place et fonctionnels
 
-\echo '=== SMOKE TEST UUID + AMORTIZATION ==='
+SELECT '=== SMOKE TEST UUID + AMORTIZATION ===' AS info;
 
 -- 1. Vérifier l'extension pgcrypto
-\echo '1. Vérification extension pgcrypto:'
+SELECT '1. Vérification extension pgcrypto:' AS info;
 SELECT 
     CASE WHEN EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgcrypto')
     THEN '✅ pgcrypto activée'
@@ -12,13 +12,13 @@ SELECT
     END as status;
 
 -- 2. Vérifier gen_random_uuid() fonctionne
-\echo '2. Test génération UUID:'
+SELECT '2. Test génération UUID:' AS info;
 SELECT 
     gen_random_uuid() as test_uuid,
     '✅ gen_random_uuid() fonctionnel' as status;
 
 -- 3. Vérifier les DEFAULT sur colonnes id uuid
-\echo '3. Vérification DEFAULT gen_random_uuid():'
+SELECT '3. Vérification DEFAULT gen_random_uuid():' AS info;
 SELECT 
     table_name,
     column_name,
@@ -33,7 +33,7 @@ WHERE table_schema = 'public'
 ORDER BY table_name;
 
 -- 4. Vérifier qu'aucun uid() problématique ne reste
-\echo '4. Vérification absence de uid() problématique:'
+SELECT '4. Vérification absence de uid() problématique:' AS info;
 SELECT 
     CASE WHEN EXISTS (
         SELECT 1 FROM information_schema.columns 
@@ -45,7 +45,7 @@ SELECT
     END as status;
 
 -- 5. Test amortization avec useful_life_years = 0 (doit être rejeté par contrainte)
-\echo '5. Test contrainte useful_life_years >= 1:'
+SELECT '5. Test contrainte useful_life_years >= 1:' AS info;
 DO $$
 DECLARE
     test_user_id UUID;
@@ -91,7 +91,7 @@ BEGIN
 END $$;
 
 -- 6. Test amortization avec useful_life_years = 10 (doit fonctionner)
-\echo '6. Test amortization valide (years=10):'
+SELECT '6. Test amortization valide (years=10):' AS info;
 DO $$
 DECLARE
     test_user_id UUID;
@@ -151,7 +151,7 @@ BEGIN
 END $$;
 
 -- 7. Vérifier les contraintes de qualité
-\echo '7. Vérification contraintes de qualité:'
+SELECT '7. Vérification contraintes de qualité:' AS info;
 SELECT 
     constraint_name,
     '✅ Contrainte active: ' || pg_get_constraintdef(oid) as status
@@ -160,7 +160,7 @@ WHERE conrelid = 'public.amortizations'::regclass
   AND constraint_name LIKE '%years%';
 
 -- 8. Test auto-génération UUID sur INSERT sans id
-\echo '8. Test auto-génération UUID:'
+SELECT '8. Test auto-génération UUID:' AS info;
 DO $$
 DECLARE
     test_user_id UUID;
@@ -208,11 +208,11 @@ BEGIN
 END $$;
 
 -- 9. Nettoyage des données de test
-\echo '9. Nettoyage des données de test:'
+SELECT '9. Nettoyage des données de test:' AS info;
 DELETE FROM public.amortizations 
 WHERE item_name LIKE 'Test %' OR item_name LIKE '%test%';
 
 SELECT '✅ Données de test nettoyées' as status;
 
-\echo '=== FIN SMOKE TEST ==='
-\echo 'Si tous les tests affichent ✅, la migration est réussie.'
+SELECT '=== FIN SMOKE TEST ===' AS info;
+SELECT 'Si tous les tests affichent ✅, la migration est réussie.' AS info;

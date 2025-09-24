@@ -11,8 +11,9 @@
   3. Documente les actions effectuées
 */
 
--- Configuration
-\set ON_ERROR_STOP on
+-- Les méta-commandes psql comme `\set ON_ERROR_STOP on` ne sont pas supportées
+-- par l'exécution des migrations Supabase. Elles ont été supprimées car le
+-- moteur arrête déjà l'exécution en cas d'erreur.
 
 -- Header
 SELECT 
