@@ -12,9 +12,15 @@ const PROPERTY_NUMERIC_FIELDS: (keyof Property)[] = ['monthly_rent']
 export const propertyService = {
   async create(propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>): Promise<Property> {
     try {
+      // S'assurer que created_by est défini
+      const dataWithCreatedBy = {
+        ...propertyData,
+        created_by: propertyData.created_by || propertyData.user_id
+      };
+
       const { data, error } = await supabase
         .from('properties')
-        .insert([propertyData])
+        .insert([dataWithCreatedBy])
         .select()
         .single()
 

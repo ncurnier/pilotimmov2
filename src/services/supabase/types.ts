@@ -77,6 +77,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
+          created_by?: string
           address: string
           start_date: string
           monthly_rent: number
@@ -89,6 +90,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
+          created_by?: string
           address: string
           start_date: string
           monthly_rent: number
@@ -100,6 +102,7 @@ export interface Database {
         }
         Update: {
           user_id?: string
+          created_by?: string
           address?: string
           start_date?: string
           monthly_rent?: number

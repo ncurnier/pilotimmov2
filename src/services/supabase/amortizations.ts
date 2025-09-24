@@ -26,6 +26,21 @@ export const amortizationService = {
         throw new Error('Le montant d\'achat ne peut pas être négatif')
       }
 
+      // Validation que property_id est fourni
+      if (!amortizationData.property_id) {
+        throw new Error('property_id est requis pour créer un amortissement')
+      }
+
+      // Vérifier que l'utilisateur a accès à cette propriété
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id, user_id')
+        .eq('id', amortizationData.property_id)
+        .single()
+
+      if (propertyError || !property) {
+        throw new Error('Propriété non trouvée ou accès refusé')
+      }
       // Les calculs sont effectués automatiquement par le trigger
       const { data, error } = await supabase
         .from('amortizations')

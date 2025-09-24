@@ -6,6 +6,7 @@ import logger from '../utils/logger';
  * Hook pour gérer le contexte de propriété dans les opérations CRUD
  * Injecte automatiquement property_id dans les créations
  * Filtre automatiquement les listes par property_id
+ * Compatible avec public.properties (user_id, pas owner_id)
  */
 export function usePropertyContext() {
   const {
@@ -23,6 +24,12 @@ export function usePropertyContext() {
       throw new Error('Aucun bien sélectionné. Impossible de créer l\'élément.');
     }
 
+    // Validation que les données ne contiennent pas owner_id (obsolète)
+    if ('owner_id' in data) {
+      logger.warn('owner_id détecté dans les données, suppression automatique');
+      const { owner_id, ...cleanData } = data;
+      data = cleanData as T;
+    }
     const result = {
       ...data,
       property_id: currentPropertyId

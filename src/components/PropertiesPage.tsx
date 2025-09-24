@@ -68,8 +68,9 @@ export function PropertiesPage({ onPageChange }: PropertiesPageProps) {
 
     try {
       setError(null);
-      await propertyService.create({
+      const newPropertyData = await propertyService.create({
         user_id: user.uid,
+        created_by: user.uid,
         address: newProperty.address,
         start_date: newProperty.startDate,
         monthly_rent: newProperty.monthlyRent,

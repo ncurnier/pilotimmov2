@@ -140,7 +140,7 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
       logger.info('Amortization added successfully');
     } catch (error) {
       logger.error('Error adding amortization:', error);
-      setError('Erreur lors de l\'ajout de l\'amortissement');
+      setError('Erreur lors de l\'ajout de l\'amortissement: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
     }
   };
 
