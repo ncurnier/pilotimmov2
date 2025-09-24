@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MessageCircle, Users, ThumbsUp, MessageSquare, Clock, Pin, Award } from 'lucide-react';
-import logger from '../utils/logger';
+import logger from '@/utils/logger';
 
 export function CommunautePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');

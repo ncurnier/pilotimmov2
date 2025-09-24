@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Play, Users, Award, CheckCircle, Star } from 'lucide-react';
-import logger from '../utils/logger';
+import logger from '@/utils/logger';
 
 export function FormationsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');

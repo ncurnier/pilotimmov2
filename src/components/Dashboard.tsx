@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSupabase } from '../hooks/useSupabase';
-import { useAuth } from '../hooks/useAuth';
+import { useSupabase } from '@/hooks/useSupabase';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   FileText, 
   Home, 
@@ -17,12 +17,12 @@ import {
   Activity,
   Bell
 } from 'lucide-react';
-import type { Declaration, Notification } from '../services/supabase/types';
-import { formatCurrency, formatDate } from '../services/supabase/utils';
-import { propertyService } from '../services/supabase/properties';
-import { revenueService } from '../services/supabase/revenues';
-import { expenseService } from '../services/supabase/expenses';
-import logger from '../utils/logger';
+import type { Declaration, Notification } from '@/services/supabase/types';
+import { formatCurrency, formatDate } from '@/services/supabase/utils';
+import { propertyService } from '@/services/supabase/properties';
+import { revenueService } from '@/services/supabase/revenues';
+import { expenseService } from '@/services/supabase/expenses';
+import logger from '@/utils/logger';
 
 interface DashboardProps {
   onPageChange: (page: string) => void;

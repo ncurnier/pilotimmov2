@@ -1,48 +1,22 @@
-import { supabase } from '../../config/supabase'
+import { supabase } from '@/config/supabase'
+import { BaseService } from './base'
 import type { Expense } from './types'
-import logger from '../../utils/logger'
-import {
-  convertArrayNumericFields,
-  convertNullableNumericFields,
-  convertNumericFields
-} from './numeric'
+import logger from '@/utils/logger'
 
-const EXPENSE_NUMERIC_FIELDS: (keyof Expense)[] = ['amount']
+class ExpenseService extends BaseService<Expense> {
+  protected tableName = 'expenses'
 
-export const expenseService = {
   async create(expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>): Promise<Expense> {
-    try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .insert([expenseData])
-        .select()
-        .single()
-
-      if (error) throw error
-      
-      logger.info('Expense created successfully', { id: data.id })
-      return convertNumericFields(data, EXPENSE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to create expense', error)
-      throw error
-    }
-  },
+    return super.create(expenseData)
+  }
 
   async getById(id: string): Promise<Expense | null> {
-    try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('id', id)
-        .single()
+    return super.getById(id)
+  }
 
-      if (error && error.code !== 'PGRST116') throw error
-      return convertNullableNumericFields(data, EXPENSE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get expense by ID', error)
-      throw error
-    }
-  },
+  async getByUserId(userId: string): Promise<Expense[]> {
+    return super.getByUserId(userId)
+  }
 
   async getByPropertyId(propertyId: string): Promise<Expense[]> {
     try {
@@ -53,58 +27,20 @@ export const expenseService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return convertArrayNumericFields(data, EXPENSE_NUMERIC_FIELDS)
+      return data || []
     } catch (error) {
       logger.error('Failed to get expenses by property ID', error)
       throw error
     }
-  },
-
-  async getByUserId(userId: string): Promise<Expense[]> {
-    try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false })
-
-      if (error) throw error
-      return convertArrayNumericFields(data, EXPENSE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get expenses by user ID', error)
-      throw error
-    }
-  },
+  }
 
   async update(id: string, updates: Partial<Expense>): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('expenses')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Expense updated successfully', { id })
-    } catch (error) {
-      logger.error('Failed to update expense', error)
-      throw error
-    }
-  },
+    return super.update(id, updates)
+  }
 
   async delete(id: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Expense deleted successfully', { id })
-    } catch (error) {
-      logger.error('Failed to delete expense', error)
-      throw error
-    }
+    return super.delete(id)
   }
 }
+
+export const expenseService = new ExpenseService()

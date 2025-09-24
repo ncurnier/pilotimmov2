@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Calculator, Plus, Edit, Trash2, Info } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
-import { usePropertyContext } from '../hooks/usePropertyContext';
-import { useAuth } from '../hooks/useAuth';
-import { amortizationService } from '../services/supabase/amortizations';
-import { propertyService } from '../services/supabase/properties';
-import type { Amortization } from '../services/supabase/types';
-import type { AmortizationCategory } from '../services/supabase/amortizations';
-import logger from '../utils/logger';
+import { usePropertyContext } from '@/hooks/usePropertyContext';
+import { useAuth } from '@/hooks/useAuth';
+import { amortizationService } from '@/services/supabase/amortizations';
+import { propertyService } from '@/services/supabase/properties';
+import type { Amortization, AmortizationCategory } from '@/services/supabase/types';
+import logger from '@/utils/logger';
 
 const ensureNumber = (value: unknown): number => {
   const numericValue = typeof value === 'number' ? value : Number(value);

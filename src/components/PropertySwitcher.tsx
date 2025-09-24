@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, Home, Search, Check, AlertCircle } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { propertyService } from '../services/supabase/properties';
-import { useCurrentProperty } from '../store/useCurrentProperty';
-import type { Property } from '../services/supabase/types';
-import logger from '../utils/logger';
+import { useAuth } from '@/hooks/useAuth';
+import { propertyService } from '@/services/supabase/properties';
+import { useCurrentProperty } from '@/store/useCurrentProperty';
+import type { Property } from '@/services/supabase/types';
+import logger from '@/utils/logger';
 
 export function PropertySwitcher() {
   const { user } = useAuth();

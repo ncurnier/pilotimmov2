@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './hooks/useAuth';
-import { useSupabase } from './hooks/useSupabase';
-import { LandingPage } from './components/LandingPage';
-import { AuthPage } from './components/AuthPage';
-import { Dashboard } from './components/Dashboard';
-import { PropertiesPage } from './components/PropertiesPage';
-import { TenantsPage } from './components/TenantsPage';
-import { RecettesPage } from './components/RecettesPage';
-import { DepensesPage } from './components/DepensesPage';
-import { AmortissementsPage } from './components/AmortissementsPage';
-import { DeclarationsPage } from './components/DeclarationsPage';
-import { MarketplacePage } from './components/MarketplacePage';
-import { FormationsPage } from './components/FormationsPage';
-import { CommunautePage } from './components/CommunautePage';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
-import logger from './utils/logger';
-import PropertyPicker from './features/properties/PropertyPicker';
-import NewAmortizationForm from './features/amortizations/NewAmortizationForm';
+import { useAuth } from '@/hooks/useAuth';
+import { useSupabase } from '@/hooks/useSupabase';
+import { LandingPage } from '@/components/LandingPage';
+import { AuthPage } from '@/components/AuthPage';
+import { Dashboard } from '@/components/Dashboard';
+import { PropertiesPage } from '@/components/PropertiesPage';
+import { TenantsPage } from '@/components/TenantsPage';
+import { RecettesPage } from '@/components/RecettesPage';
+import { DepensesPage } from '@/components/DepensesPage';
+import { AmortissementsPage } from '@/components/AmortissementsPage';
+import { DeclarationsPage } from '@/components/DeclarationsPage';
+import { MarketplacePage } from '@/components/MarketplacePage';
+import { FormationsPage } from '@/components/FormationsPage';
+import { CommunautePage } from '@/components/CommunautePage';
+import { Sidebar } from '@/components/Sidebar';
+import { Header } from '@/components/Header';
+import logger from '@/utils/logger';
 
 
 function App() {
@@ -120,9 +118,15 @@ function App() {
               <p className="text-gray-600">Ajoutez un équipement à amortir selon les règles LMNP</p>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
-              <PropertyPicker />
-              <hr className="border-gray-200" />
-              <NewAmortizationForm />
+              <div className="text-center py-8">
+                <p className="text-gray-600">Fonctionnalité en cours de développement</p>
+                <button
+                  onClick={() => setCurrentPage('amortissements')}
+                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Retour aux amortissements
+                </button>
+              </div>
             </div>
           </div>
         );

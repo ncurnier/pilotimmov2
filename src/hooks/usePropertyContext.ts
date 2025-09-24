@@ -1,6 +1,6 @@
-import { useCurrentProperty } from '../store/useCurrentProperty';
+import { useCurrentProperty } from '@/store/useCurrentProperty';
 import { useCallback } from 'react';
-import logger from '../utils/logger';
+import logger from '@/utils/logger';
 
 type PropertyDataWithId<T extends Record<string, unknown>> = Omit<T, 'owner_id'> & {
   property_id: string;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Leaf, ToggleLeft, ToggleRight, Edit, Plus, Trash2 } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
-import { usePropertyContext } from '../hooks/usePropertyContext';
-import { useAuth } from '../hooks/useAuth';
-import { expenseService } from '../services/supabase/expenses';
-import { propertyService } from '../services/supabase/properties';
-import type { Expense } from '../services/supabase/types';
-import logger from '../utils/logger';
+import { usePropertyContext } from '@/hooks/usePropertyContext';
+import { useAuth } from '@/hooks/useAuth';
+import { expenseService } from '@/services/supabase/expenses';
+import { propertyService } from '@/services/supabase/properties';
+import type { Expense } from '@/services/supabase/types';
+import logger from '@/utils/logger';
 
 const ensureNumber = (value: unknown): number => {
   const numericValue = typeof value === 'number' ? value : Number(value);

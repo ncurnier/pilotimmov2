@@ -1,48 +1,22 @@
-import { supabase } from '../../config/supabase'
+import { supabase } from '@/config/supabase'
+import { BaseService } from './base'
 import type { Revenue } from './types'
-import logger from '../../utils/logger'
-import {
-  convertArrayNumericFields,
-  convertNullableNumericFields,
-  convertNumericFields
-} from './numeric'
+import logger from '@/utils/logger'
 
-const REVENUE_NUMERIC_FIELDS: (keyof Revenue)[] = ['amount']
+class RevenueService extends BaseService<Revenue> {
+  protected tableName = 'revenues'
 
-export const revenueService = {
   async create(revenueData: Omit<Revenue, 'id' | 'created_at' | 'updated_at'>): Promise<Revenue> {
-    try {
-      const { data, error } = await supabase
-        .from('revenues')
-        .insert([revenueData])
-        .select()
-        .single()
-
-      if (error) throw error
-      
-      logger.info('Revenue created successfully', { id: data.id })
-      return convertNumericFields(data, REVENUE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to create revenue', error)
-      throw error
-    }
-  },
+    return super.create(revenueData)
+  }
 
   async getById(id: string): Promise<Revenue | null> {
-    try {
-      const { data, error } = await supabase
-        .from('revenues')
-        .select('*')
-        .eq('id', id)
-        .single()
+    return super.getById(id)
+  }
 
-      if (error && error.code !== 'PGRST116') throw error
-      return convertNullableNumericFields(data, REVENUE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get revenue by ID', error)
-      throw error
-    }
-  },
+  async getByUserId(userId: string): Promise<Revenue[]> {
+    return super.getByUserId(userId)
+  }
 
   async getByPropertyId(propertyId: string): Promise<Revenue[]> {
     try {
@@ -53,58 +27,20 @@ export const revenueService = {
         .order('date', { ascending: false })
 
       if (error) throw error
-      return convertArrayNumericFields(data, REVENUE_NUMERIC_FIELDS)
+      return data || []
     } catch (error) {
       logger.error('Failed to get revenues by property ID', error)
       throw error
     }
-  },
-
-  async getByUserId(userId: string): Promise<Revenue[]> {
-    try {
-      const { data, error } = await supabase
-        .from('revenues')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false })
-
-      if (error) throw error
-      return convertArrayNumericFields(data, REVENUE_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get revenues by user ID', error)
-      throw error
-    }
-  },
+  }
 
   async update(id: string, updates: Partial<Revenue>): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('revenues')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Revenue updated successfully', { id })
-    } catch (error) {
-      logger.error('Failed to update revenue', error)
-      throw error
-    }
-  },
+    return super.update(id, updates)
+  }
 
   async delete(id: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('revenues')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Revenue deleted successfully', { id })
-    } catch (error) {
-      logger.error('Failed to delete revenue', error)
-      throw error
-    }
+    return super.delete(id)
   }
 }
+
+export const revenueService = new RevenueService()

@@ -1,24 +1,20 @@
-import { supabase } from '../../config/supabase'
+import { supabase } from '@/config/supabase'
+import { BaseService } from './base'
 import type { Notification } from './types'
-import logger from '../../utils/logger'
+import logger from '@/utils/logger'
 
-export const notificationService = {
-  async create(
-    notificationData: Omit<
-      Notification,
-      'id' | 'created_at' | 'updated_at' | 'read' | 'read_at'
-    >
-  ): Promise<string> {
+class NotificationService extends BaseService<Notification> {
+  protected tableName = 'notifications'
+
+  async create(notificationData: Omit<Notification, 'id' | 'created_at' | 'updated_at' | 'read' | 'read_at'>): Promise<string> {
     try {
       const { data, error } = await supabase
         .from('notifications')
-        .insert([
-          {
-            ...notificationData,
-            read: false,
-            action_url: notificationData.action_url ?? null
-          }
-        ])
+        .insert([{
+          ...notificationData,
+          read: false,
+          action_url: notificationData.action_url ?? null
+        }])
         .select()
         .single()
 
@@ -30,7 +26,7 @@ export const notificationService = {
       logger.error('Failed to create notification', error)
       throw error
     }
-  },
+  }
 
   async getByUserId(userId: string, unreadOnly: boolean = false): Promise<Notification[]> {
     try {
@@ -51,7 +47,7 @@ export const notificationService = {
       logger.error('Failed to fetch notifications', error)
       throw error
     }
-  },
+  }
 
   async markAsRead(notificationId: string): Promise<void> {
     try {
@@ -71,7 +67,7 @@ export const notificationService = {
       logger.error('Failed to mark notification as read', error)
       throw error
     }
-  },
+  }
 
   async markAllAsRead(userId: string): Promise<void> {
     try {
@@ -94,3 +90,5 @@ export const notificationService = {
     }
   }
 }
+
+export const notificationService = new NotificationService()

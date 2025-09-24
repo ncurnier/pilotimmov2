@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from './useAuth'
-import { getUserDashboardData, initializeUserProfile } from '../services/supabase/utils'
-import { userService } from '../services/supabase/users'
-import { notificationService } from '../services/supabase/notifications'
-import type { UserProfile, Notification, DashboardData } from '../services/supabase/types'
-import logger from '../utils/logger'
+import { getUserDashboardData, initializeUserProfile } from '@/services/supabase/utils'
+import { userService } from '@/services/supabase/users'
+import { notificationService } from '@/services/supabase/notifications'
+import type { UserProfile, Notification, DashboardData } from '@/services/supabase/types'
+import logger from '@/utils/logger'
 
 export function useSupabase() {
   const { user } = useAuth()

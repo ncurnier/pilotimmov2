@@ -1,142 +1,189 @@
-# PilotImmo - Plateforme LMNP avec Supabase
+# PilotImmo - Plateforme LMNP
 
-## Démarrage rapide
+Application web moderne pour la gestion locative meublée non professionnelle (LMNP) avec optimisation fiscale intégrée.
 
-L'application utilise Supabase comme backend. Lancez simplement :
+## 🚀 Démarrage rapide
 
 ```bash
+# Installation des dépendances
+npm install
+
+# Démarrage en développement
 npm run dev
+
+# Build de production
+npm run build
+
+# Aperçu de production
+npm run preview
 ```
 
-## Configuration Supabase
+## ⚙️ Configuration
+
+### Variables d'environnement
 
 Copiez `.env.example` vers `.env` et configurez vos variables Supabase :
 
 ```bash
 cp .env.example .env
-# puis éditez .env avec vos clés Supabase
 ```
 
-## Variables d'environnement
+Variables requises dans `.env` :
 
-Définissez les clés suivantes dans `.env` :
-
-```
-VITE_SUPABASE_URL=your-supabase-url
+```env
+VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Ces variables sont utilisées dans `src/config/supabase.ts` pour initialiser Supabase.
+### Base de données Supabase
 
-## Tests
+1. **Créez un projet Supabase** sur [supabase.com](https://supabase.com)
+2. **Exécutez les migrations** via SQL Editor ou CLI Supabase
+3. **Configurez l'authentification** (Email/Password activé)
 
-### Tests unitaires (Vitest)
-```bash
-# Exécuter tous les tests
-npm test
+Les migrations se trouvent dans `supabase/migrations/` et doivent être exécutées côté Supabase. Aucune migration n'est embarquée côté frontend.
 
-# Mode watch (développement)
-npm run test:watch
+## 🏗️ Architecture
+
+### Stack technique
+
+- **Frontend** : Vite + React 18 + TypeScript
+- **Styling** : Tailwind CSS + Fonts (Montserrat, Playfair Display)
+- **Backend** : Supabase (PostgreSQL + Auth + RLS)
+- **State** : Zustand pour la gestion d'état locale
+- **Icons** : Lucide React
+
+### Structure du projet
+
+```
+src/
+├── components/          # Composants React réutilisables
+├── hooks/              # Hooks personnalisés
+├── services/           # Services Supabase et API
+│   └── supabase/       # Services base de données
+├── store/              # Stores Zustand
+├── utils/              # Utilitaires et helpers
+├── config/             # Configuration (Supabase, etc.)
+└── index.css           # Styles globaux
 ```
 
-### Tests SQL (Smoke tests)
-```bash
-# Définir la base de test
-export DATABASE_URL="postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres"
+### Services Supabase
 
-# Exécuter les smoke tests
-npm run test:sql
+Tous les services suivent le pattern BaseService avec :
+- CRUD standardisé
+- Gestion d'erreur cohérente
+- Logging automatique
+- Types TypeScript stricts
+
+## 🎯 Fonctionnalités
+
+### Gestion LMNP complète
+
+- ✅ **Authentification** - Inscription/connexion sécurisée
+- ✅ **Biens immobiliers** - CRUD complet des propriétés
+- ✅ **Locataires** - Gestion des baux et contacts
+- ✅ **Revenus** - Suivi des loyers et recettes
+- ✅ **Dépenses** - Charges déductibles par catégorie
+- ✅ **Amortissements** - Calculs automatiques selon règles LMNP
+- ✅ **Déclarations** - Génération et suivi fiscal
+- ✅ **Dashboard** - Statistiques et KPIs en temps réel
+
+### Services additionnels
+
+- 📚 **Formations** - Modules d'apprentissage LMNP
+- 👥 **Communauté** - Forum d'entraide entre investisseurs
+- 🛒 **Marketplace** - Réseau de partenaires experts
+- 🔔 **Notifications** - Alertes et rappels personnalisés
+
+## 🔒 Sécurité
+
+- **Row Level Security (RLS)** activé sur toutes les tables
+- **Authentification Supabase** avec email/password
+- **Isolation des données** par utilisateur
+- **Validation côté client et serveur**
+
+## 🚀 Déploiement
+
+### Build de production
+
+```bash
+npm run build
 ```
 
-### Tests de seeds de développement
-```bash
-# Définir la base de données de test
-export DATABASE_URL="postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres"
+Le build génère un dossier `dist/` prêt pour déploiement statique.
 
-# Exécuter le seed de développement
-psql "$DATABASE_URL" -f sql/seed_dev_amortization.sql
+### Variables d'environnement production
 
-# Exécuter les tests de validation
-psql "$DATABASE_URL" -f sql/smoke_test_placeholders.sql
-```
+Configurez les mêmes variables que pour le développement :
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
-### Tests complets (CI)
-```bash
-# Tous les tests (unit + SQL)
-npm run ci:test
-```
+### Plateformes supportées
 
-### Configuration CI/CD
+- Vercel, Netlify, GitHub Pages
+- Tout hébergeur de sites statiques
+- CDN avec support SPA
 
-Pour activer les tests en CI, définissez ces secrets GitHub :
-- `DATABASE_URL_TEST` : URL de votre base Supabase de test (optionnel, CI utilise PostgreSQL local)
+## 📊 Base de données
 
-Les tests s'exécutent automatiquement sur chaque push/PR vers `main` ou `develop`.
+### Tables principales
 
-### Tests unitaires (Vitest)
-```bash
-# Exécuter tous les tests
-npm test
-
-# Mode watch (développement)
-npm run test:watch
-```
-
-### Tests SQL (Smoke tests)
-```bash
-# Définir la base de test
-export DATABASE_URL="postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres"
-
-# Exécuter les smoke tests
-npm run test:sql
-```
-
-### Tests complets (CI)
-```bash
-# Tous les tests (unit + SQL)
-npm run ci:test
-```
-
-### Configuration CI/CD
-
-Pour activer les tests en CI, définissez ces secrets GitHub :
-- `DATABASE_URL_TEST` : URL de votre base Supabase de test
-
-Les tests s'exécutent automatiquement sur chaque push/PR vers `main` ou `develop`.
-
-## Structure de la base de données
-
-### Tables créées :
-- `users` - Profils utilisateurs avec préférences et statistiques
+- `users` - Profils utilisateurs et préférences
 - `properties` - Biens immobiliers LMNP
-- `revenues` - Revenus locatifs par propriété
+- `tenants` - Locataires et baux
+- `revenues` - Revenus locatifs
 - `expenses` - Dépenses déductibles
-- `declarations` - Déclarations fiscales LMNP
-- `notifications` - Système de notifications
+- `amortizations` - Amortissements d'équipements
+- `declarations` - Déclarations fiscales
+- `notifications` - Système d'alertes
 
-## Fonctionnalités
+### Migrations
 
-✅ **Authentification** - Inscription/connexion avec Supabase Auth
-✅ **Gestion des biens** - CRUD complet des propriétés LMNP
-✅ **Revenus/Dépenses** - Suivi financier détaillé
-✅ **Déclarations** - Création et gestion des déclarations fiscales
-✅ **Dashboard** - Statistiques et graphiques en temps réel
-✅ **Notifications** - Système d'alertes personnalisées
+Les migrations SQL se trouvent dans `supabase/migrations/` et doivent être appliquées via :
+- Supabase Dashboard (SQL Editor)
+- Supabase CLI (`supabase db push`)
 
-## Logging
+**Important** : Aucune migration n'est exécutée côté frontend pour des raisons de sécurité.
 
-Use the `logger` utility (`src/utils/logger.ts`) for application logging.
+## 🛠️ Développement
 
-### Levels
-- `logger.info(...args)` – informational messages, suppressed in production.
-- `logger.warn(...args)` – warnings, suppressed in production.
-- `logger.error(...args)` – errors, always logged; in production they are prefixed with `[ERROR]`.
+### Commandes disponibles
 
-### Usage
-
-```ts
-import logger from './utils/logger';
-
-logger.info('Loaded component');
-logger.error('Failed to fetch', err);
+```bash
+npm run dev      # Serveur de développement (port 5173)
+npm run build    # Build de production
+npm run preview  # Aperçu du build
+npm run lint     # Vérification ESLint
 ```
+
+### Alias de chemins
+
+Le projet utilise l'alias `@` pour les imports :
+
+```typescript
+import { propertyService } from '@/services/supabase/properties'
+import logger from '@/utils/logger'
+```
+
+### État vide
+
+Si aucune donnée n'est présente, l'application affiche des états vides avec des actions pour guider l'utilisateur plutôt que de planter.
+
+## 📝 Notes importantes
+
+- **Aucun seed/test embarqué** - Données créées via l'interface utilisateur
+- **Pas de PL/pgSQL inline** - Toute logique complexe côté Supabase
+- **Build optimisé** - Minification et tree-shaking automatiques
+- **Types stricts** - TypeScript configuré en mode strict
+
+## 🆘 Support
+
+En cas de problème :
+1. Vérifiez les variables d'environnement
+2. Contrôlez la connexion Supabase
+3. Consultez les logs du navigateur
+4. Vérifiez que les migrations sont appliquées
+
+---
+
+**PilotImmo** - Simplifiez votre gestion locative LMNP

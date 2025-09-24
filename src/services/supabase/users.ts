@@ -1,25 +1,14 @@
-import { supabase } from '../../config/supabase'
+import { BaseService } from './base'
 import type { UserProfile } from './types'
-import logger from '../../utils/logger'
+import { supabase } from '@/config/supabase'
+import logger from '@/utils/logger'
 
-export const userService = {
+class UserService extends BaseService<UserProfile> {
+  protected tableName = 'users'
+
   async create(userData: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>): Promise<UserProfile> {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .insert([userData])
-        .select()
-        .single()
-
-      if (error) throw error
-      
-      logger.info('User created successfully', { user_id: userData.user_id })
-      return data
-    } catch (error) {
-      logger.error('Failed to create user', error)
-      throw error
-    }
-  },
+    return super.create(userData)
+  }
 
   async getByUserId(user_id: string): Promise<UserProfile | null> {
     try {
@@ -35,39 +24,15 @@ export const userService = {
       logger.error('Failed to get user by user_id', error)
       throw error
     }
-  },
+  }
 
   async getById(id: string): Promise<UserProfile | null> {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      return data || null
-    } catch (error) {
-      logger.error('Failed to get user by ID', error)
-      throw error
-    }
-  },
+    return super.getById(id)
+  }
 
   async update(id: string, updates: Partial<UserProfile>): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('User updated successfully', { id })
-    } catch (error) {
-      logger.error('Failed to update user', error)
-      throw error
-    }
-  },
+    return super.update(id, updates)
+  }
 
   async updateStats(userId: string, stats: Partial<UserProfile['stats']>): Promise<void> {
     try {
@@ -91,7 +56,7 @@ export const userService = {
       logger.error('Failed to update user stats', error)
       throw error
     }
-  },
+  }
 
   async updatePreferences(userId: string, preferences: Partial<UserProfile['preferences']>): Promise<void> {
     try {
@@ -117,3 +82,5 @@ export const userService = {
     }
   }
 }
+
+export const userService = new UserService()

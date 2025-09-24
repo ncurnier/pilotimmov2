@@ -5,7 +5,7 @@ import { revenueService } from './revenues'
 import { expenseService } from './expenses'
 import { notificationService } from './notifications'
 import type { UserProfile, DashboardData, DashboardStats } from './types'
-import logger from '../../utils/logger'
+import logger from '@/utils/logger'
 
 const ensureNumber = (value: unknown): number => {
   const numericValue = typeof value === 'number' ? value : Number(value)
@@ -13,7 +13,7 @@ const ensureNumber = (value: unknown): number => {
 }
 
 /**
- * Initialise le profil utilisateur s'il n'existe pas déjà
+ * Initialize user profile if it doesn't exist
  */
 export async function initializeUserProfile(
   user_id: string, 
@@ -21,14 +21,12 @@ export async function initializeUserProfile(
   displayName: string
 ): Promise<UserProfile> {
   try {
-    // Vérifier si le profil existe déjà
     const existingProfile = await userService.getByUserId(user_id)
     
     if (existingProfile) {
       return existingProfile
     }
 
-    // Créer un nouveau profil utilisateur
     const [firstName, ...lastNameParts] = displayName.split(' ')
     const lastName = lastNameParts.join(' ')
 
@@ -62,7 +60,7 @@ export async function initializeUserProfile(
 }
 
 /**
- * Récupère toutes les données nécessaires pour le tableau de bord
+ * Get all dashboard data for a user
  */
 export async function getUserDashboardData(userId: string): Promise<DashboardData> {
   try {
@@ -71,15 +69,11 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
       declarationService.getByUserId(userId),
       revenueService.getByUserId(userId),
       expenseService.getByUserId(userId),
-      notificationService.getByUserId(userId, true) // Seulement les non lues
+      notificationService.getByUserId(userId, true)
     ])
 
-    // Calculer les statistiques
     const totalRevenue = revenues.reduce((sum, revenue) => sum + ensureNumber(revenue.amount), 0)
-    const totalExpenses = expenses.reduce(
-      (sum, expense) => sum + ensureNumber(expense.amount),
-      0
-    )
+    const totalExpenses = expenses.reduce((sum, expense) => sum + ensureNumber(expense.amount), 0)
     const netProfit = totalRevenue - totalExpenses
 
     const stats: DashboardStats = {
@@ -90,19 +84,15 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
       unreadNotifications: notifications.length
     }
 
-    // Trier et limiter les données récentes
-    const recentRevenues = revenues.slice(0, 5)
-    const recentExpenses = expenses.slice(0, 5)
-
     const dashboardData: DashboardData = {
       stats,
-      declarations: declarations.slice(0, 3), // 3 déclarations les plus récentes
-      notifications: notifications.slice(0, 5), // 5 notifications les plus récentes
-      recentRevenues,
-      recentExpenses
+      declarations: declarations.slice(0, 3),
+      notifications: notifications.slice(0, 5),
+      recentRevenues: revenues.slice(0, 5),
+      recentExpenses: expenses.slice(0, 5)
     }
 
-    // Mettre à jour les statistiques utilisateur
+    // Update user stats
     try {
       await userService.updateStats(userId, {
         properties_count: properties.length,
@@ -113,11 +103,11 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
     } catch (error) {
       logger.warn('Failed to update user stats:', error)
     }
+
     return dashboardData
   } catch (error) {
     logger.error('Error loading dashboard data:', error)
     
-    // Retourner des données par défaut en cas d'erreur
     return {
       stats: {
         propertiesCount: 0,
@@ -135,7 +125,7 @@ export async function getUserDashboardData(userId: string): Promise<DashboardDat
 }
 
 /**
- * Formate les montants pour l'affichage
+ * Format currency for display
  */
 export function formatCurrency(amount: number, currency: string = 'EUR'): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -145,9 +135,8 @@ export function formatCurrency(amount: number, currency: string = 'EUR'): string
 }
 
 /**
- * Formate les dates pour l'affichage
+ * Format dates for display
  */
 export function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('fr-FR')
 }
-

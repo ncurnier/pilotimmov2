@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Users, Star, MapPin, Phone, Mail, ExternalLink, Filter, Search } from 'lucide-react';
-import logger from '../utils/logger';
+import logger from '@/utils/logger';
 
 export function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');

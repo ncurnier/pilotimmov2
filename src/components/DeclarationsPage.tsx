@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, CheckCircle, Plus, Download, Eye, Trash2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { declarationService } from '../services/supabase/declarations';
-import { propertyService } from '../services/supabase/properties';
-import { revenueService } from '../services/supabase/revenues';
-import { expenseService } from '../services/supabase/expenses';
-import type { Declaration, Property, Revenue, Expense } from '../services/supabase/types';
-import { formatDate, formatCurrency } from '../services/supabase/utils';
-import logger from '../utils/logger';
+import { useAuth } from '@/hooks/useAuth';
+import { declarationService } from '@/services/supabase/declarations';
+import { propertyService } from '@/services/supabase/properties';
+import { revenueService } from '@/services/supabase/revenues';
+import { expenseService } from '@/services/supabase/expenses';
+import type { Declaration, Property, Revenue, Expense } from '@/services/supabase/types';
+import { formatDate, formatCurrency } from '@/services/supabase/utils';
+import logger from '@/utils/logger';
 
 const ensureNumber = (value: unknown): number => {
   const numericValue = typeof value === 'number' ? value : Number(value);

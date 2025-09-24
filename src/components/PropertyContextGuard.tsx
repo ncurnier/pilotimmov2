@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, Home, Plus } from 'lucide-react';
-import { useCurrentProperty } from '../store/useCurrentProperty';
+import { useCurrentProperty } from '@/store/useCurrentProperty';
 import { PropertySwitcher } from './PropertySwitcher';
 
 interface PropertyContextGuardProps {

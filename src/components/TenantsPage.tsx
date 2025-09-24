@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Edit, Trash2, Calendar, Phone, Mail, MapPin } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
-import { usePropertyContext } from '../hooks/usePropertyContext';
-import { useAuth } from '../hooks/useAuth';
-import { tenantService } from '../services/supabase/tenants';
-import { propertyService } from '../services/supabase/properties';
-import type { Tenant } from '../services/supabase/types';
-import logger from '../utils/logger';
+import { usePropertyContext } from '@/hooks/usePropertyContext';
+import { useAuth } from '@/hooks/useAuth';
+import { tenantService } from '@/services/supabase/tenants';
+import { propertyService } from '@/services/supabase/properties';
+import type { Tenant } from '@/services/supabase/types';
+import logger from '@/utils/logger';
 
 interface NewTenantState {
   firstName: string;

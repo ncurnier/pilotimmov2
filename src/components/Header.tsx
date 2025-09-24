@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { PropertySwitcher } from './PropertySwitcher';
-import { useSupabase } from '../hooks/useSupabase';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Bell, User, LogOut, Settings, HelpCircle } from 'lucide-react';
 
 interface HeaderProps {
