@@ -16,6 +16,7 @@ import { CommunautePage } from './components/CommunautePage';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import logger from './utils/logger';
+import PropertyPicker from './features/properties/PropertyPicker';
 import NewAmortizationForm from './features/amortizations/NewAmortizationForm';
 
 
@@ -111,8 +112,20 @@ function App() {
             </div>
           </div>
         );
-      case 'amortissements_new': // ⬅️ AJOUT
-        return <NewAmortizationForm />;
+      case 'amortissements_new':
+        return (
+          <div className="p-6 max-w-4xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Nouvel amortissement</h1>
+              <p className="text-gray-600">Ajoutez un équipement à amortir selon les règles LMNP</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+              <PropertyPicker />
+              <hr className="border-gray-200" />
+              <NewAmortizationForm />
+            </div>
+          </div>
+        );
 
       default:
         return <Dashboard onPageChange={setCurrentPage} />;

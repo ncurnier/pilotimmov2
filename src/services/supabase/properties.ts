@@ -1,100 +1,74 @@
-import { supabase } from '../../config/supabase'
-import type { Property } from './types'
-import logger from '../../utils/logger'
-import {
-  convertArrayNumericFields,
-  convertNullableNumericFields,
-  convertNumericFields
-} from './numeric'
+import { supabase } from "../../lib/supabaseClient";
 
-const PROPERTY_NUMERIC_FIELDS: (keyof Property)[] = ['monthly_rent']
+export type Property = {
+  id: string;
+  user_id: string;
+  created_by?: string;
+  address: string;
+  monthly_rent: number;
+  status: 'active' | 'inactive';
+  start_date: string;
+  description?: string;
+  type?: 'apartment' | 'house' | 'studio' | 'other';
+  created_at: string;
+  updated_at: string;
+};
 
-export const propertyService = {
-  async create(propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>): Promise<Property> {
-    try {
-      // S'assurer que created_by est défini
-      const dataWithCreatedBy = {
-        ...propertyData,
-        created_by: propertyData.created_by || propertyData.user_id
-      };
+/**
+ * Liste les propriétés de l'utilisateur connecté
+ * Utilise auth.uid() côté RLS pour filtrer automatiquement
+ */
+export async function listMyProperties(): Promise<Property[]> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*")
+    .order("created_at", { ascending: false });
+    
+  if (error) throw error;
+  return data ?? [];
+}
 
-      const { data, error } = await supabase
-        .from('properties')
-        .insert([dataWithCreatedBy])
-        .select()
-        .single()
+/**
+ * Récupère une propriété par son ID
+ */
+export async function getPropertyById(id: string): Promise<Property | null> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("id", id)
+    .single();
+    
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || null;
+}
 
-      if (error) throw error
-      
-      logger.info('Property created successfully', { id: data.id })
-      return convertNumericFields(data, PROPERTY_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to create property', error)
-      throw error
-    }
-  },
-
-  async getById(id: string): Promise<Property | null> {
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      return convertNullableNumericFields(data, PROPERTY_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get property by ID', error)
-      throw error
-    }
-  },
-
-  async getByUserId(userId: string): Promise<Property[]> {
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return convertArrayNumericFields(data, PROPERTY_NUMERIC_FIELDS)
-    } catch (error) {
-      logger.error('Failed to get properties by user ID', error)
-      throw error
-    }
-  },
-
-  async update(id: string, updates: Partial<Property>): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Property updated successfully', { id })
-    } catch (error) {
-      logger.error('Failed to update property', error)
-      throw error
-    }
-  },
-
-  async delete(id: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      
-      logger.info('Property deleted successfully', { id })
-    } catch (error) {
-      logger.error('Failed to delete property', error)
-      throw error
-    }
-  }
+/**
+ * Crée une nouvelle propriété
+ * user_id et created_by sont remplis automatiquement via DEFAULT auth.uid()
+ */
+export async function createProperty(params: {
+  address: string;
+  monthlyRent: number;
+  startDate: string;
+  description?: string;
+  type?: Property['type'];
+}): Promise<Property> {
+  const { address, monthlyRent, startDate, description, type } = params;
+  
+  const { data, error } = await supabase
+    .from("properties")
+    .insert({
+      // user_id et created_by remplis par DEFAULT auth.uid()
+      address,
+      monthly_rent: monthlyRent,
+      start_date: startDate,
+      description,
+      type: type || 'apartment',
+      status: 'active'
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
 }

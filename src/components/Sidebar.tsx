@@ -73,6 +73,11 @@ export function Sidebar({ currentPage, onPageChange, notificationCount }: Sideba
                   >
                     <Icon className={`h-5 w-5 transition-smooth ${isActive ? 'text-accent-gold' : 'hover:text-accent-gold'}`} />
                     <span className="font-medium">{item.label}</span>
+                    {item.id === 'amortissements' && (
+                      <span className="ml-auto bg-accent-green text-text-secondary text-xs px-2 py-1 rounded-full">
+                        Nouveau
+                      </span>
+                    )}
                   </button>
                 </li>
               );

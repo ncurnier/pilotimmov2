@@ -271,18 +271,27 @@ export function AmortissementsPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Amortissements LMNP</h1>
           <p className="text-gray-600">Gérez vos amortissements selon les règles fiscales LMNP</p>
         </div>
-        <button
-          disabled={!canCreate}
-          onClick={() => setShowAddForm(true)}
-          className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-            canCreate 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <Plus className="h-4 w-4" />
-          <span>Ajouter un amortissement</span>
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => window.location.hash = '#amortissements_new'}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Nouvel amortissement</span>
+          </button>
+          <button
+            disabled={!canCreate}
+            onClick={() => setShowAddForm(true)}
+            className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+              canCreate 
+                ? 'bg-green-600 text-white hover:bg-green-700' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <Plus className="h-4 w-4" />
+            <span>Ajout rapide</span>
+          </button>
+        </div>
       </div>
 
       {!canCreate && (
