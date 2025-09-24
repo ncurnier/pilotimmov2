@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:sql": "bash ./scripts/test-sql.sh",
     "ci:test": "npm run test && npm run test:sql",
-    "preview": "vite preview"
+    "preview": "vite preview --port 5173"
+
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.2.6",
