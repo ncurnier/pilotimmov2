@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Euro, ToggleLeft, ToggleRight, Edit, Plus, Trash2 } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '../hooks/usePropertyContext';
@@ -14,11 +13,14 @@ const ensureNumber = (value: unknown): number => {
   return Number.isFinite(numericValue) ? numericValue : 0;
 };
 
-interface RecettesPageProps {
-  onPageChange?: (page: string) => void;
+interface NewRevenueState {
+  amount: number;
+  date: string;
+  description: string;
+  type: Revenue['type'];
 }
 
-export function RecettesPage({ onPageChange }: RecettesPageProps) {
+export function RecettesPage() {
   const { user } = useAuth();
   const {
     currentPropertyId,
@@ -37,22 +39,16 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
   const [editingProperty, setEditingProperty] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newRevenue, setNewRevenue] = useState({
+  const [newRevenue, setNewRevenue] = useState<NewRevenueState>({
     amount: 0,
     date: new Date().toISOString().split('T')[0],
     description: 'Loyers encaissés',
     type: 'rent' as const
   });
 
-  useEffect(() => {
-    if (user && currentPropertyId) {
-      loadData();
-    }
-  }, [user, currentPropertyId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user || !currentPropertyId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -79,7 +75,13 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPropertyId, setCurrentProperty, clearCurrentProperty]);
+
+  useEffect(() => {
+    if (user && currentPropertyId) {
+      void loadData();
+    }
+  }, [user, currentPropertyId, loadData]);
 
   const getPropertyRevenue = (propertyId: string) => {
     return revenues
@@ -428,15 +430,7 @@ export function RecettesPage({ onPageChange }: RecettesPageProps) {
       {/* Tableau des recettes par bien */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900">Recettes par bien</h2>
-            <button 
-              onClick={() => onPageChange?.('depenses')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-            >
-              Étape suivante
-            </button>
-          </div>
+          <h2 className="text-lg font-semibold text-gray-900">Recettes par bien</h2>
         </div>
 
         <div className="overflow-x-auto">

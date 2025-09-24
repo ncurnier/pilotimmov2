@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Calculator, Plus, Edit, Trash2, Info } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '../hooks/usePropertyContext';
@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { amortizationService } from '../services/supabase/amortizations';
 import { propertyService } from '../services/supabase/properties';
 import type { Amortization } from '../services/supabase/types';
+import type { AmortizationCategory } from '../services/supabase/amortizations';
 import logger from '../utils/logger';
 
 const ensureNumber = (value: unknown): number => {
@@ -13,11 +14,16 @@ const ensureNumber = (value: unknown): number => {
   return Number.isFinite(numericValue) ? numericValue : 0;
 };
 
-interface AmortissementsPageProps {
-  onPageChange?: (page: string) => void;
+interface FormState {
+  itemName: string;
+  category: AmortizationCategory;
+  purchaseDate: string;
+  purchaseAmount: number;
+  usefulLifeYears: number;
+  notes: string;
 }
 
-export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
+export function AmortissementsPage() {
   const { user } = useAuth();
   const {
     currentPropertyId,
@@ -33,24 +39,18 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAmortization, setEditingAmortization] = useState<Amortization | null>(null);
-  const [newAmortization, setNewAmortization] = useState({
+  const [newAmortization, setNewAmortization] = useState<FormState>({
     itemName: '',
-    category: 'mobilier' as const,
+    category: 'mobilier',
     purchaseDate: new Date().toISOString().split('T')[0],
     purchaseAmount: 0,
     usefulLifeYears: 10,
     notes: ''
   });
 
-  useEffect(() => {
-    if (user && currentPropertyId) {
-      loadData();
-    }
-  }, [user, currentPropertyId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user || !currentPropertyId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -77,15 +77,21 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPropertyId, setCurrentProperty, clearCurrentProperty]);
 
-  const handleCategoryChange = (category: string) => {
+  useEffect(() => {
+    if (user && currentPropertyId) {
+      void loadData();
+    }
+  }, [user, currentPropertyId, loadData]);
+
+  const handleCategoryChange = (category: AmortizationCategory) => {
     const usefulLife = amortizationService.getUsefulLifeByCategory(category);
-    setNewAmortization({
-      ...newAmortization,
-      category: category as any,
+    setNewAmortization((prev) => ({
+      ...prev,
+      category,
       usefulLifeYears: usefulLife
-    });
+    }));
   };
 
   const handleAddAmortization = async (e: React.FormEvent) => {
@@ -130,9 +136,9 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
         useful_life_years: newAmortization.usefulLifeYears,
         accumulated_amortization: 0,
         status: 'active',
-        notes: newAmortization.notes
+        notes: newAmortization.notes || null
       });
-      
+
       await amortizationService.create(amortizationData);
 
       resetForm();
@@ -186,7 +192,7 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
         purchase_date: newAmortization.purchaseDate,
         purchase_amount: newAmortization.purchaseAmount,
         useful_life_years: newAmortization.usefulLifeYears,
-        notes: newAmortization.notes
+        notes: newAmortization.notes || null
       });
 
       resetForm();
@@ -347,7 +353,7 @@ export function AmortissementsPage({ onPageChange }: AmortissementsPageProps) {
                 </label>
                 <select
                   value={newAmortization.category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value as AmortizationCategory)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >

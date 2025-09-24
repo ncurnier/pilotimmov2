@@ -2,6 +2,10 @@ import { useCurrentProperty } from '../store/useCurrentProperty';
 import { useCallback } from 'react';
 import logger from '../utils/logger';
 
+type PropertyDataWithId<T extends Record<string, unknown>> = Omit<T, 'owner_id'> & {
+  property_id: string;
+};
+
 /**
  * Hook pour gérer le contexte de propriété dans les opérations CRUD
  * Injecte automatiquement property_id dans les créations
@@ -19,29 +23,34 @@ export function usePropertyContext() {
   } = useCurrentProperty();
 
   // Injecter property_id dans les données de création
-  const injectPropertyId = useCallback(<T extends Record<string, any>>(data: T): T & { property_id: string } => {
-    if (!currentPropertyId) {
-      throw new Error('Aucun bien sélectionné. Impossible de créer l\'élément.');
-    }
+  const injectPropertyId = useCallback(
+    <T extends Record<string, unknown>>(data: T): PropertyDataWithId<T> => {
+      if (!currentPropertyId) {
+        throw new Error('Aucun bien sélectionné. Impossible de créer l\'élément.');
+      }
 
-    // Validation que les données ne contiennent pas owner_id (obsolète)
-    if ('owner_id' in data) {
-      logger.warn('owner_id détecté dans les données, suppression automatique');
-      const { owner_id, ...cleanData } = data;
-      data = cleanData as T;
-    }
-    const result = {
-      ...data,
-      property_id: currentPropertyId
-    };
+      // Validation que les données ne contiennent pas owner_id (obsolète)
+      const cleanData = { ...data } as Record<string, unknown>;
 
-    logger.info('Property ID injected into data:', { 
-      property_id: currentPropertyId, 
-      dataType: typeof data 
-    });
+      if ('owner_id' in cleanData) {
+        logger.warn('owner_id détecté dans les données, suppression automatique');
+        delete cleanData.owner_id;
+      }
 
-    return result;
-  }, [currentPropertyId]);
+      const result: PropertyDataWithId<T> = {
+        ...(cleanData as Omit<T, 'owner_id'>),
+        property_id: currentPropertyId
+      };
+
+      logger.info('Property ID injected into data:', {
+        property_id: currentPropertyId,
+        dataType: typeof data
+      });
+
+      return result;
+    },
+    [currentPropertyId]
+  );
 
   // Vérifier qu'un bien est sélectionné avant une opération
   const requireProperty = useCallback((operation: string = 'cette opération') => {

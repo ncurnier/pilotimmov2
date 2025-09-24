@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Edit, Trash2, Calendar, Phone, Mail, MapPin } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '../hooks/usePropertyContext';
@@ -8,11 +8,19 @@ import { propertyService } from '../services/supabase/properties';
 import type { Tenant } from '../services/supabase/types';
 import logger from '../utils/logger';
 
-interface TenantsPageProps {
-  onPageChange?: (page: string) => void;
+interface NewTenantState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+  deposit: number;
+  notes: string;
 }
 
-export function TenantsPage({ onPageChange }: TenantsPageProps) {
+export function TenantsPage() {
   const { user } = useAuth();
   const {
     currentPropertyId,
@@ -28,7 +36,7 @@ export function TenantsPage({ onPageChange }: TenantsPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
-  const [newTenant, setNewTenant] = useState({
+  const [newTenant, setNewTenant] = useState<NewTenantState>({
     firstName: '',
     lastName: '',
     email: '',
@@ -40,15 +48,9 @@ export function TenantsPage({ onPageChange }: TenantsPageProps) {
     notes: ''
   });
 
-  useEffect(() => {
-    if (user && currentPropertyId) {
-      loadData();
-    }
-  }, [user, currentPropertyId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user || !currentPropertyId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -75,7 +77,13 @@ export function TenantsPage({ onPageChange }: TenantsPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPropertyId, setCurrentProperty, clearCurrentProperty]);
+
+  useEffect(() => {
+    if (user && currentPropertyId) {
+      void loadData();
+    }
+  }, [user, currentPropertyId, loadData]);
 
   const handleAddTenant = async (e: React.FormEvent) => {
     e.preventDefault();

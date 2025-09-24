@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 const charges = [
@@ -9,7 +9,7 @@ const charges = [
 const Charges: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const exportCSV = () => {
+  const exportCSV = useCallback(() => {
     const rows = [
       ['id', 'label', 'amount'],
       ...charges.map((c) => [c.id, c.label, c.amount])
@@ -21,7 +21,7 @@ const Charges: React.FC = () => {
     link.setAttribute('href', url);
     link.setAttribute('download', 'charges.csv');
     link.click();
-  };
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('export') === 'csv') {
@@ -29,7 +29,7 @@ const Charges: React.FC = () => {
       searchParams.delete('export');
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams]);
+  }, [exportCSV, searchParams, setSearchParams]);
 
   return (
     <div>

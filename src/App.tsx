@@ -69,13 +69,13 @@ function App() {
       case 'properties':
         return <PropertiesPage onPageChange={setCurrentPage} />;
       case 'tenants':
-        return <TenantsPage onPageChange={setCurrentPage} />;
+        return <TenantsPage />;
       case 'recettes':
-        return <RecettesPage onPageChange={setCurrentPage} />;
+        return <RecettesPage />;
       case 'depenses':
-        return <DepensesPage onPageChange={setCurrentPage} />;
+        return <DepensesPage />;
       case 'amortissements':
-        return <AmortissementsPage onPageChange={setCurrentPage} />;
+        return <AmortissementsPage />;
       case 'declarations':
         return <DeclarationsPage onPageChange={setCurrentPage} />;
       case 'marketplace':

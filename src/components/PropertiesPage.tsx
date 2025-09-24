@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, MapPin, Calendar, Edit, MoreVertical, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCurrentProperty } from '../store/useCurrentProperty';
 import { propertyService } from '../services/supabase/properties';
@@ -24,17 +24,9 @@ export function PropertiesPage({ onPageChange }: PropertiesPageProps) {
     monthlyRent: 0
   });
 
-  React.useEffect(() => {
-    if (user) {
-      loadProperties();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const loadProperties = async () => {
+  const loadProperties = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       setError(null);
       const userProperties = await propertyService.getByUserId(user.uid);
@@ -45,7 +37,15 @@ export function PropertiesPage({ onPageChange }: PropertiesPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      void loadProperties();
+    } else {
+      setLoading(false);
+    }
+  }, [user, loadProperties]);
 
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ export function PropertiesPage({ onPageChange }: PropertiesPageProps) {
 
     try {
       setError(null);
-      const newPropertyData = await propertyService.create({
+      await propertyService.create({
         user_id: user.uid,
         created_by: user.uid,
         address: newProperty.address,
