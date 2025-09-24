@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, Home, Search, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { propertyService } from '../services/supabase/properties';
@@ -15,28 +15,9 @@ export function PropertySwitcher() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      loadProperties();
-    }
-  }, [user]);
-
-  // Load current property details if we only have the ID
-  useEffect(() => {
-    if (currentPropertyId && !currentProperty && properties.length > 0) {
-      const property = properties.find(p => p.id === currentPropertyId);
-      if (property) {
-        setCurrentProperty(property);
-      } else {
-        // Property not found, clear the selection
-        clearCurrentProperty();
-      }
-    }
-  }, [currentPropertyId, currentProperty, properties, setCurrentProperty, clearCurrentProperty]);
-
-  const loadProperties = async () => {
+  const loadProperties = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -49,7 +30,25 @@ export function PropertySwitcher() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      void loadProperties();
+    }
+  }, [user, loadProperties]);
+
+  // Load current property details if we only have the ID
+  useEffect(() => {
+    if (currentPropertyId && !currentProperty && properties.length > 0) {
+      const property = properties.find(p => p.id === currentPropertyId);
+      if (property) {
+        setCurrentProperty(property);
+      } else {
+        clearCurrentProperty();
+      }
+    }
+  }, [currentPropertyId, currentProperty, properties, setCurrentProperty, clearCurrentProperty]);
 
   const handlePropertySelect = (property: Property) => {
     setCurrentProperty(property);

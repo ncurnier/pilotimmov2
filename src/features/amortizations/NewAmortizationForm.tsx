@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCurrentProperty } from "../../store/useCurrentProperty";
-import { createAmortization } from "../../services/supabase/amortizations";
+import { amortizationService } from "../../services/supabase/amortizations";
 
 export default function NewAmortizationForm() {
   const { currentPropertyId } = useCurrentProperty();
@@ -26,15 +26,22 @@ export default function NewAmortizationForm() {
 
     setIsSubmitting(true);
     try {
-      await createAmortization({
-        propertyId: currentPropertyId,
-        itemName,
-        purchaseAmount,
-        usefulLifeYears,
+      await amortizationService.create({
+        property_id: currentPropertyId,
+        item_name: itemName,
+        category: "mobilier",
+        purchase_date: new Date(),
+        purchase_amount: purchaseAmount,
+        useful_life_years: usefulLifeYears,
+        status: "active",
       });
       setMsg("✅ Amortissement créé");
-    } catch (err: any) {
-      setMsg(`❌ ${err.message ?? "Erreur inconnue"}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setMsg(`❌ ${err.message}`);
+      } else {
+        setMsg("❌ Erreur inconnue");
+      }
     } finally {
       setIsSubmitting(false);
     }

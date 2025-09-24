@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Leaf, ToggleLeft, ToggleRight, Edit, Plus, Trash2 } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '../hooks/usePropertyContext';
@@ -14,11 +13,15 @@ const ensureNumber = (value: unknown): number => {
   return Number.isFinite(numericValue) ? numericValue : 0;
 };
 
-interface DepensesPageProps {
-  onPageChange?: (page: string) => void;
+interface NewExpenseState {
+  amount: number;
+  date: string;
+  description: string;
+  category: Expense['category'];
+  deductible: boolean;
 }
 
-export function DepensesPage({ onPageChange }: DepensesPageProps) {
+export function DepensesPage() {
   const { user } = useAuth();
   const {
     currentPropertyId,
@@ -37,7 +40,7 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
   const [editingProperty, setEditingProperty] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newExpense, setNewExpense] = useState({
+  const [newExpense, setNewExpense] = useState<NewExpenseState>({
     amount: 0,
     date: new Date().toISOString().split('T')[0],
     description: 'Charges déductibles',
@@ -45,15 +48,9 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
     deductible: true
   });
 
-  useEffect(() => {
-    if (user && currentPropertyId) {
-      loadData();
-    }
-  }, [user, currentPropertyId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user || !currentPropertyId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -80,7 +77,13 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPropertyId, setCurrentProperty, clearCurrentProperty]);
+
+  useEffect(() => {
+    if (user && currentPropertyId) {
+      void loadData();
+    }
+  }, [user, currentPropertyId, loadData]);
 
   const getPropertyExpenses = (propertyId: string) => {
     return expenses
@@ -298,7 +301,12 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
                 </label>
                 <select
                   value={newExpense.category}
-                  onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value as any })}
+                  onChange={(e) =>
+                    setNewExpense({
+                      ...newExpense,
+                      category: e.target.value as Expense['category']
+                    })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="maintenance">Maintenance</option>
@@ -456,15 +464,7 @@ export function DepensesPage({ onPageChange }: DepensesPageProps) {
       {/* Tableau des dépenses par bien */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900">Dépenses par bien</h2>
-            <button 
-              onClick={() => onPageChange?.('declarations')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-            >
-              Étape suivante
-            </button>
-          </div>
+          <h2 className="text-lg font-semibold text-gray-900">Dépenses par bien</h2>
         </div>
 
         <div className="overflow-x-auto">

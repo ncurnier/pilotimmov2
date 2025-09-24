@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from './useAuth'
 import { getUserDashboardData, initializeUserProfile } from '../services/supabase/utils'
 import { userService } from '../services/supabase/users'
@@ -14,26 +14,36 @@ export function useSupabase() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialiser le profil utilisateur quand l'utilisateur se connecte
-  useEffect(() => {
-    if (user) {
-      initializeUser()
-    } else {
-      resetState()
-    }
-  }, [user])
-
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setUserProfile(null)
     setNotifications([])
     setDashboardData(null)
     setLoading(false)
     setError(null)
-  }
+  }, [])
 
-  const initializeUser = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) return
-    
+
+    try {
+      const [profile, unreadNotifications, dashboard] = await Promise.all([
+        userService.getByUserId(user.uid),
+        notificationService.getByUserId(user.uid, true),
+        getUserDashboardData(user.uid)
+      ])
+
+      setUserProfile(profile)
+      setNotifications(unreadNotifications)
+      setDashboardData(dashboard)
+    } catch (err) {
+      logger.error('Error loading user data:', err)
+      setError('Erreur lors du chargement des données')
+    }
+  }, [user])
+
+  const initializeUser = useCallback(async () => {
+    if (!user) return
+
     try {
       setLoading(true)
       setError(null)
@@ -53,28 +63,9 @@ export function useSupabase() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, loadUserData])
 
-  const loadUserData = async () => {
-    if (!user) return
-
-    try {
-      const [profile, unreadNotifications, dashboard] = await Promise.all([
-        userService.getByUserId(user.uid),
-        notificationService.getByUserId(user.uid, true),
-        getUserDashboardData(user.uid)
-      ])
-
-      setUserProfile(profile)
-      setNotifications(unreadNotifications)
-      setDashboardData(dashboard)
-    } catch (err) {
-      logger.error('Error loading user data:', err)
-      setError('Erreur lors du chargement des données')
-    }
-  }
-
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     if (user) {
       setError(null)
       try {
@@ -84,18 +75,28 @@ export function useSupabase() {
         setError('Erreur lors du rafraîchissement des données')
       }
     }
-  }
+  }, [user, loadUserData])
+
+  // Initialiser le profil utilisateur quand l'utilisateur se connecte
+  useEffect(() => {
+    if (user) {
+      void initializeUser()
+    } else {
+      resetState()
+    }
+  }, [user, initializeUser, resetState])
 
   // Auto-refresh des données toutes les 5 minutes
   useEffect(() => {
     if (user) {
       const interval = setInterval(() => {
-        refreshData()
+        void refreshData()
       }, 2 * 60 * 1000) // 2 minutes pour un meilleur suivi
-      
+
       return () => clearInterval(interval)
     }
-  }, [user])
+    return undefined
+  }, [user, refreshData])
 
   const markNotificationAsRead = async (notificationId: string) => {
     try {

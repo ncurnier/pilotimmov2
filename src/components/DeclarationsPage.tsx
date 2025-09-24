@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, CheckCircle, Plus, Download, Eye, Trash2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { declarationService } from '../services/supabase/declarations';
@@ -31,15 +30,9 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
   const [showNewDeclarationForm, setShowNewDeclarationForm] = useState(false);
   const [newDeclarationYear, setNewDeclarationYear] = useState(new Date().getFullYear() - 1);
 
-  useEffect(() => {
-    if (user) {
-      loadAllData();
-    }
-  }, [user]);
-
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -72,7 +65,13 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      void loadAllData();
+    }
+  }, [user, loadAllData]);
 
   const calculateDeclarationTotals = (year: number) => {
     const yearRevenues = revenues.filter(r => new Date(r.date).getFullYear() === year);

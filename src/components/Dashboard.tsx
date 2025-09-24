@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSupabase } from '../hooks/useSupabase';
 import { useAuth } from '../hooks/useAuth';
 import { 
@@ -41,18 +40,9 @@ export function Dashboard({ onPageChange }: DashboardProps) {
   });
 
   // Charger les statistiques en temps réel
-  useEffect(() => {
-    if (user) {
-      loadRealTimeStats();
-      // Recharger les données toutes les 30 secondes
-      const interval = setInterval(loadRealTimeStats, 60000); // 1 minute
-      return () => clearInterval(interval);
-    }
-  }, [user]);
-
-  const loadRealTimeStats = async () => {
+  const loadRealTimeStats = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const [properties, revenues, expenses] = await Promise.all([
         propertyService.getByUserId(user.uid),
@@ -72,7 +62,15 @@ export function Dashboard({ onPageChange }: DashboardProps) {
     } catch (error) {
       logger.error('Error loading real-time stats:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      void loadRealTimeStats();
+      const interval = setInterval(loadRealTimeStats, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [user, loadRealTimeStats]);
 
   if (loading) {
     return (
@@ -100,8 +98,6 @@ export function Dashboard({ onPageChange }: DashboardProps) {
   }
 
   const stats = dashboardData?.stats || realTimeStats;
-  const unreadNotifications = dashboardData?.stats?.unreadNotifications || 0;
-
   const declarations = dashboardData?.declarations || [];
   const notifications = dashboardData?.notifications || [];
 
