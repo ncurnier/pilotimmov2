@@ -17,6 +17,12 @@ const AMORTIZATION_NUMERIC_FIELDS: (keyof Amortization)[] = [
 export const amortizationService = {
   async create(amortizationData: Omit<Amortization, 'id' | 'created_at' | 'updated_at'>): Promise<Amortization> {
     try {
+      // Validation anti-placeholder (sécurité)
+      if (amortizationData.user_id === 'test-user-id' || 
+          amortizationData.property_id === 'test-property-id') {
+        throw new Error('Placeholders string interdits - utilisez des UUIDs réels uniquement')
+      }
+
       // Validation côté client
       if (amortizationData.useful_life_years <= 0) {
         throw new Error('La durée d\'amortissement doit être supérieure à 0 (minimum 1 an)')
@@ -205,6 +211,11 @@ export const amortizationService = {
   // Validation des règles métier LMNP
   validateAmortizationData(data: Partial<Amortization>): string[] {
     const errors: string[] = []
+
+    // Validation anti-placeholder
+    if (data.user_id === 'test-user-id' || data.property_id === 'test-property-id') {
+      errors.push('Placeholders string interdits - utilisez des UUIDs réels uniquement')
+    }
 
     // Validation anti-placeholder
     if (data.user_id === 'test-user-id' || data.property_id === 'test-property-id') {

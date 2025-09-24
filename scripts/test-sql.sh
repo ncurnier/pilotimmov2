@@ -22,8 +22,8 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed_dev_amortization.sql
 
 # Exécuter le smoke test principal
 echo ""
-echo "📋 Test de compatibilité properties..."
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/smoke_properties_compatibility.sql
+echo "📋 Test de validation des placeholders..."
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/smoke_test_placeholders.sql
 
 echo ""
 echo "✅ Tous les tests SQL sont passés avec succès!"
