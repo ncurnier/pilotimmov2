@@ -19,7 +19,7 @@ export const amortizationService = {
     try {
       // Validation côté client
       if (amortizationData.useful_life_years <= 0) {
-        throw new Error('La durée d\'amortissement doit être supérieure à 0')
+        throw new Error('La durée d\'amortissement doit être supérieure à 0 (minimum 1 an)')
       }
 
       if (amortizationData.purchase_amount < 0) {
@@ -29,6 +29,12 @@ export const amortizationService = {
       // Validation que property_id est fourni
       if (!amortizationData.property_id) {
         throw new Error('property_id est requis pour créer un amortissement')
+      }
+
+      // Validation anti-placeholder (sécurité)
+      if (amortizationData.user_id === 'test-user-id' || 
+          amortizationData.property_id === 'test-property-id') {
+        throw new Error('Placeholders string interdits - utilisez des UUIDs réels uniquement')
       }
 
       // Vérifier que l'utilisateur a accès à cette propriété
@@ -200,9 +206,14 @@ export const amortizationService = {
   validateAmortizationData(data: Partial<Amortization>): string[] {
     const errors: string[] = []
 
+    // Validation anti-placeholder
+    if (data.user_id === 'test-user-id' || data.property_id === 'test-property-id') {
+      errors.push('Placeholders string interdits - utilisez des UUIDs réels uniquement')
+    }
+
     if (data.useful_life_years !== undefined) {
       if (data.useful_life_years <= 0) {
-        errors.push('La durée d\'amortissement doit être supérieure à 0')
+        errors.push('La durée d\'amortissement doit être supérieure à 0 (minimum 1 an)')
       }
       if (data.useful_life_years > 50) {
         errors.push('La durée d\'amortissement ne peut pas dépasser 50 ans')

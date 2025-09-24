@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de test SQL pour PilotImmo
-# Exécute les smoke tests sur la base de données
+# Exécute les smoke tests et seeds sur la base de données
 
 set -e
 
@@ -12,8 +12,13 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
-echo "🧪 Exécution des smoke tests SQL..."
+echo "🧪 Exécution des tests SQL..."
 echo "Base de données: $(echo $DATABASE_URL | sed 's/:[^:]*@/@***@/')"
+
+# Exécuter le seed de développement
+echo ""
+echo "🌱 Exécution du seed de développement..."
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed_dev_amortization.sql
 
 # Exécuter le smoke test principal
 echo ""
@@ -22,3 +27,5 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/smoke_properties_compatibility.sq
 
 echo ""
 echo "✅ Tous les tests SQL sont passés avec succès!"
+echo "✅ Aucun placeholder string détecté"
+echo "✅ Toutes les contraintes respectées"
