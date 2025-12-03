@@ -6,6 +6,8 @@ import { notificationService } from '@/services/supabase/notifications'
 import type { UserProfile, Notification, DashboardData } from '@/services/supabase/types'
 import logger from '@/utils/logger'
 
+const REFRESH_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes pour un meilleur suivi
+
 export function useSupabase() {
   const { user } = useAuth()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -86,12 +88,12 @@ export function useSupabase() {
     }
   }, [user, initializeUser, resetState])
 
-  // Auto-refresh des données toutes les 5 minutes
+  // Auto-refresh des données toutes les 2 minutes
   useEffect(() => {
     if (user) {
       const interval = setInterval(() => {
         void refreshData()
-      }, 2 * 60 * 1000) // 2 minutes pour un meilleur suivi
+      }, REFRESH_INTERVAL_MS)
 
       return () => clearInterval(interval)
     }
