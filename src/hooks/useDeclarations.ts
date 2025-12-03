@@ -3,7 +3,8 @@ import { declarationService } from '@/services/supabase/declarations'
 import { propertyService } from '@/services/supabase/properties'
 import { revenueService } from '@/services/supabase/revenues'
 import { expenseService } from '@/services/supabase/expenses'
-import type { Declaration, DeclarationDetails, Property, Revenue, Expense } from '@/services/supabase/types'
+import { amortizationService } from '@/services/supabase/amortizations'
+import type { Declaration, DeclarationDetails, Property, Revenue, Expense, Amortization } from '@/services/supabase/types'
 import { buildDeclarationContext, type DeclarationContext } from '@/domain/declarations/context'
 import { calculateDeclarationTotals } from '@/domain/declarations/calculations'
 import logger from '@/utils/logger'
@@ -13,6 +14,7 @@ interface UseDeclarationsResult {
   properties: Property[]
   revenues: Revenue[]
   expenses: Expense[]
+  amortizations: Amortization[]
   loading: boolean
   error: string | null
   currentDeclaration: Declaration | null
@@ -34,6 +36,7 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
   const [properties, setProperties] = useState<Property[]>([])
   const [revenues, setRevenues] = useState<Revenue[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [amortizations, setAmortizations] = useState<Amortization[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentDeclaration, setCurrentDeclaration] = useState<Declaration | null>(null)
@@ -45,17 +48,19 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
       setLoading(true)
       setError(null)
 
-      const [declarationsData, propertiesData, revenuesData, expensesData] = await Promise.all([
+      const [declarationsData, propertiesData, revenuesData, expensesData, amortizationsData] = await Promise.all([
         declarationService.getByUserId(userId),
         propertyService.getByUserId(userId),
         revenueService.getByUserId(userId),
-        expenseService.getByUserId(userId)
+        expenseService.getByUserId(userId),
+        amortizationService.getByUserId(userId)
       ])
 
       setDeclarations(declarationsData)
       setProperties(propertiesData)
       setRevenues(revenuesData)
       setExpenses(expensesData)
+      setAmortizations(amortizationsData)
 
       const inProgress = declarationsData.find((declaration) =>
         declaration.status === 'in_progress' || declaration.status === 'draft'
@@ -67,7 +72,8 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
         declarations: declarationsData.length,
         properties: propertiesData.length,
         revenues: revenuesData.length,
-        expenses: expensesData.length
+        expenses: expensesData.length,
+        amortizations: amortizationsData.length
       })
     } catch (refreshError) {
       logger.error('Error while refreshing declarations data', refreshError)
@@ -82,8 +88,9 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
   }, [refresh])
 
   const calculateTotals = useCallback(
-    (year: number) => calculateDeclarationTotals(year, revenues, expenses),
-    [revenues, expenses]
+    (year: number, propertyIds?: string[]) =>
+      calculateDeclarationTotals(year, revenues, expenses, amortizations, propertyIds),
+    [amortizations, expenses, revenues]
   )
 
   const selectDeclaration = useCallback((declaration: Declaration | null) => {
@@ -101,8 +108,8 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
         return null
       }
 
-      const { totalRevenue, totalExpenses, netResult } = calculateTotals(year)
       const propertyIds = properties.map((property) => property.id)
+      const { totalRevenue, totalExpenses, netResult } = calculateTotals(year, propertyIds)
 
       const newDeclaration = await declarationService.create({
         user_id: userId,
@@ -133,7 +140,10 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
       const declaration = declarations.find((item) => item.id === id)
       if (!declaration) return
 
-      const { totalRevenue, totalExpenses, netResult } = calculateTotals(declaration.year)
+      const { totalRevenue, totalExpenses, netResult } = calculateTotals(
+        declaration.year,
+        declaration.properties
+      )
 
       await declarationService.update(id, {
         status,
@@ -185,8 +195,8 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
 
   const getDeclarationContext = useCallback(
     (declaration: Declaration): DeclarationContext =>
-      buildDeclarationContext(declaration, revenues, expenses, properties),
-    [expenses, properties, revenues]
+      buildDeclarationContext(declaration, revenues, expenses, properties, amortizations),
+    [amortizations, expenses, properties, revenues]
   )
 
   const memoizedResult = useMemo(
@@ -195,6 +205,7 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
       properties,
       revenues,
       expenses,
+      amortizations,
       loading,
       error,
       currentDeclaration,
@@ -212,6 +223,7 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
       properties,
       revenues,
       expenses,
+      amortizations,
       loading,
       error,
       currentDeclaration,

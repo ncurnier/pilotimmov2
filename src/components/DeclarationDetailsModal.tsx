@@ -64,7 +64,7 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
         </div>
 
         <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
               <p className="text-sm text-gray-600">Revenus totaux</p>
               <p className="text-xl font-semibold text-green-600">{formatCurrency(totals.totalRevenue)}</p>
@@ -74,14 +74,20 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
               <p className="text-xl font-semibold text-red-600">{formatCurrency(totals.totalExpenses)}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600">Résultat net</p>
+              <p className="text-sm text-gray-600">Amortissements (LMNP)</p>
+              <p className="text-xl font-semibold text-purple-700">
+                {formatCurrency(totals.totalAmortizations)}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+              <p className="text-sm text-gray-600">Résultat fiscal</p>
               <p className={`text-xl font-semibold ${totals.netResult >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(totals.netResult)}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-semibold text-gray-900">Revenus ({context.revenues.length})</h4>
@@ -129,6 +135,32 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
                 )}
               </div>
             </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-900">Amortissements ({context.amortizations.length})</h4>
+                <span className="text-xs text-gray-500">Régime LMNP BIC</span>
+              </div>
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                {context.amortizations.map((amortization) => (
+                  <div key={amortization.id} className="text-sm text-gray-700 space-y-1 border-b border-gray-100 pb-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{formatDate(amortization.purchase_date)}</span>
+                      <span className="font-medium text-purple-700">
+                        {formatCurrency(amortization.annual_amortization)} / an
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>{amortization.item_name}</span>
+                      <span>{amortization.useful_life_years} ans</span>
+                    </div>
+                  </div>
+                ))}
+                {context.amortizations.length === 0 && (
+                  <p className="text-sm text-gray-500">Aucun amortissement actif pour cette année fiscale.</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -169,7 +201,7 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
 
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                {context.properties.length} bien(s) associé(s) • {context.revenues.length} revenu(s) • {context.expenses.length} dépense(s)
+                {context.properties.length} bien(s) associé(s) • {context.revenues.length} revenu(s) • {context.expenses.length} dépense(s) • {context.amortizations.length} amortissement(s)
               </div>
               <div className="flex space-x-3">
                 <button

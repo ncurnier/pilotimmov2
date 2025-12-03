@@ -23,6 +23,7 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
     properties,
     revenues,
     expenses,
+    amortizations,
     loading,
     error,
     setError,
@@ -50,8 +51,8 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
   )
 
   const previewTotals = useMemo(
-    () => calculateDeclarationTotals(newDeclarationYear, revenues, expenses),
-    [expenses, newDeclarationYear, revenues]
+    () => calculateDeclarationTotals(newDeclarationYear, revenues, expenses, amortizations, properties.map((p) => p.id)),
+    [amortizations, expenses, newDeclarationYear, properties, revenues]
   )
 
   const handleCreateDeclaration = async () => {
@@ -160,23 +161,37 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
               </select>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-2">Aperçu des données pour {newDeclarationYear}</h3>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Propriétés:</span>
-                  <span className="ml-2 font-medium">{properties.length}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Revenus:</span>
-                  <span className="ml-2 font-medium text-green-600">{formatCurrency(previewTotals.totalRevenue)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Dépenses:</span>
-                  <span className="ml-2 font-medium text-red-600">{formatCurrency(previewTotals.totalExpenses)}</span>
-                </div>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-medium text-gray-900 mb-2">Aperçu des données pour {newDeclarationYear}</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="text-gray-600">Propriétés:</span>
+                <span className="ml-2 font-medium">{properties.length}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Revenus:</span>
+                <span className="ml-2 font-medium text-green-600">{formatCurrency(previewTotals.totalRevenue)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Dépenses:</span>
+                <span className="ml-2 font-medium text-red-600">{formatCurrency(previewTotals.totalExpenses)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Amortissements:</span>
+                <span className="ml-2 font-medium text-purple-600">
+                  {formatCurrency(previewTotals.totalAmortizations)}
+                </span>
+              </div>
+              <div className="md:col-span-2 lg:col-span-1">
+                <span className="text-gray-600">Résultat fiscal (LMNP):</span>
+                <span
+                  className={`ml-2 font-medium ${previewTotals.netResult >= 0 ? 'text-green-700' : 'text-red-700'}`}
+                >
+                  {formatCurrency(previewTotals.netResult)}
+                </span>
               </div>
             </div>
+          </div>
 
             <div className="flex space-x-3">
               <button
@@ -243,7 +258,7 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
                     <div>
                       <span className="text-gray-600">Revenus totaux:</span>
                       <div className="font-medium text-green-600">
@@ -257,7 +272,13 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
                       </div>
                     </div>
                     <div>
-                      <span className="text-gray-600">Résultat net:</span>
+                      <span className="text-gray-600">Amortissements:</span>
+                      <div className="font-medium text-purple-700">
+                        {formatCurrency(currentContext?.totals.totalAmortizations ?? 0)}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Résultat fiscal (LMNP):</span>
                       <div className={`font-medium ${currentDeclaration.net_result >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(currentDeclaration.net_result)}
                       </div>
