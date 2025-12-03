@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FileText, CheckCircle, Plus, Download, Eye, Trash2, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { formatDate, formatCurrency } from '@/services/supabase/utils'

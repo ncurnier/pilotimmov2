@@ -1,4 +1,11 @@
-export type AmortizationCategory = 'mobilier' | 'electromenager' | 'informatique' | 'travaux' | 'amenagement' | 'autre'
+export type AmortizationCategory =
+  | 'mobilier'
+  | 'electromenager'
+  | 'informatique'
+  | 'travaux'
+  | 'amenagement'
+  | 'immeuble_hors_terrain'
+  | 'autre'
 
 // Core database types
 export interface UserProfile {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AlertCircle, CheckCircle2, PencilLine, RefreshCw } from 'lucide-react'
 import type { Declarant } from '@/services/supabase/types'
 

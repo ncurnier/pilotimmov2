@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MessageCircle, Users, ThumbsUp, MessageSquare, Clock, Pin, Award } from 'lucide-react';
 import logger from '@/utils/logger';
 

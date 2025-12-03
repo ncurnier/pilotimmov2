@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Calculator, Plus, Edit, Trash2, Info } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '@/hooks/usePropertyContext';
@@ -93,7 +93,7 @@ export function AmortissementsPage() {
     }));
   };
 
-  const handleAddAmortization = async (e: React.FormEvent) => {
+  const handleAddAmortization = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !canCreate) return;
 
@@ -126,6 +126,9 @@ export function AmortissementsPage() {
         return;
       }
 
+      const annualAmortization =
+        newAmortization.purchaseAmount / newAmortization.usefulLifeYears;
+
       const amortizationData = injectPropertyId({
         user_id: user.uid,
         item_name: newAmortization.itemName,
@@ -133,9 +136,11 @@ export function AmortissementsPage() {
         purchase_date: newAmortization.purchaseDate,
         purchase_amount: newAmortization.purchaseAmount,
         useful_life_years: newAmortization.usefulLifeYears,
+        annual_amortization: ensureNumber(annualAmortization),
         accumulated_amortization: 0,
-        status: 'active',
-        notes: newAmortization.notes || null
+        remaining_value: newAmortization.purchaseAmount,
+        status: 'active' as const,
+        notes: newAmortization.notes || undefined
       });
 
       await amortizationService.create(amortizationData);
@@ -162,7 +167,7 @@ export function AmortissementsPage() {
     setShowAddForm(true);
   };
 
-  const handleUpdateAmortization = async (e: React.FormEvent) => {
+  const handleUpdateAmortization = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !editingAmortization) return;
 
@@ -191,7 +196,7 @@ export function AmortissementsPage() {
         purchase_date: newAmortization.purchaseDate,
         purchase_amount: newAmortization.purchaseAmount,
         useful_life_years: newAmortization.usefulLifeYears,
-        notes: newAmortization.notes || null
+        notes: newAmortization.notes || undefined
       });
 
       resetForm();

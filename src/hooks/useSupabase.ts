@@ -29,7 +29,7 @@ export function useSupabase() {
 
     try {
       const [profile, unreadNotifications, dashboard] = await Promise.all([
-        userService.getByUserId(user.uid),
+        userService.getProfileByUserId(user.uid),
         notificationService.getByUserId(user.uid, true),
         getUserDashboardData(user.uid)
       ])

@@ -1,7 +1,6 @@
-import React from 'react';
-import { 
-  Building2, 
-  LayoutDashboard, 
+import {
+  Building2,
+  LayoutDashboard,
   Home, 
   TrendingUp, 
   TrendingDown,

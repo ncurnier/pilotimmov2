@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState } from 'react';
 import { PropertySwitcher } from './PropertySwitcher';
 import { useSupabase } from '@/hooks/useSupabase';

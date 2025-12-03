@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Users, Star, MapPin, Phone, Mail, ExternalLink, Filter, Search } from 'lucide-react';
 import logger from '@/utils/logger';
 

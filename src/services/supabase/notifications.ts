@@ -6,7 +6,7 @@ import logger from '@/utils/logger'
 class NotificationService extends BaseService<Notification> {
   protected tableName = 'notifications'
 
-  async create(notificationData: Omit<Notification, 'id' | 'created_at' | 'updated_at' | 'read' | 'read_at'>): Promise<string> {
+  async create(notificationData: Omit<Notification, 'id' | 'created_at' | 'updated_at' | 'read' | 'read_at'>): Promise<Notification> {
     try {
       const { data, error } = await supabase
         .from('notifications')
@@ -21,7 +21,7 @@ class NotificationService extends BaseService<Notification> {
       if (error) throw error
 
       logger.info('Notification created successfully', { id: data.id })
-      return data.id
+      return data
     } catch (error) {
       logger.error('Failed to create notification', error)
       throw error

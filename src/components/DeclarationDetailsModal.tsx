@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Download, RefreshCcw, Save, X } from 'lucide-react'
 import type { Declaration, DeclarationDetails } from '@/services/supabase/types'
 import type { DeclarationContext } from '@/domain/declarations/context'
