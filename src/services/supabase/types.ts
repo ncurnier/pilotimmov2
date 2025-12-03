@@ -110,9 +110,17 @@ export interface Declaration {
   net_result: number
   properties: string[]
   documents: string[]
-  details: Record<string, unknown>
+  details: DeclarationDetails
   created_at: string
   updated_at: string
+}
+
+export interface DeclarationDetails {
+  created_automatically?: boolean
+  description?: string
+  regime?: string
+  first_declaration?: boolean
+  notes?: string
 }
 
 export interface Notification {
