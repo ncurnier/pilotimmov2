@@ -87,7 +87,14 @@ export interface Amortization {
   user_id: string
   property_id: string
   item_name: string
-  category: 'mobilier' | 'electromenager' | 'informatique' | 'travaux' | 'amenagement' | 'autre'
+  category:
+    | 'mobilier'
+    | 'electromenager'
+    | 'informatique'
+    | 'travaux'
+    | 'amenagement'
+    | 'immeuble_hors_terrain'
+    | 'autre'
   purchase_date: string
   purchase_amount: number
   useful_life_years: number

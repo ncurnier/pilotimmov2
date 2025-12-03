@@ -12,18 +12,35 @@ const ensureNumber = (value: unknown): number => {
   return Number.isFinite(numericValue) ? numericValue : 0
 }
 
-export const getRevenuesForYear = (year: number, revenues: Revenue[]): Revenue[] =>
-  revenues.filter((revenue) => new Date(revenue.date).getFullYear() === year)
+export const getRevenuesForYear = (
+  year: number,
+  revenues: Revenue[],
+  propertyIds?: string[]
+): Revenue[] => {
+  const hasPropertyFilter = Array.isArray(propertyIds) && propertyIds.length > 0
+
+  return revenues.filter((revenue) => {
+    const isSameYear = new Date(revenue.date).getFullYear() === year
+    const matchesProperty = hasPropertyFilter ? propertyIds!.includes(revenue.property_id) : true
+    return isSameYear && matchesProperty
+  })
+}
 
 export const getExpensesForYear = (
   year: number,
   expenses: Expense[],
+  propertyIds?: string[],
   { deductibleOnly = true }: { deductibleOnly?: boolean } = { deductibleOnly: true }
-): Expense[] =>
-  expenses.filter((expense) => {
+): Expense[] => {
+  const hasPropertyFilter = Array.isArray(propertyIds) && propertyIds.length > 0
+
+  return expenses.filter((expense) => {
     const isSameYear = new Date(expense.date).getFullYear() === year
-    return deductibleOnly ? isSameYear && expense.deductible : isSameYear
+    const matchesProperty = hasPropertyFilter ? propertyIds!.includes(expense.property_id) : true
+    const isDeductible = deductibleOnly ? expense.deductible : true
+    return isSameYear && matchesProperty && isDeductible
   })
+}
 
 export const getAmortizationsForYear = (
   year: number,
@@ -47,8 +64,8 @@ export const calculateDeclarationTotals = (
   amortizations: Amortization[] = [],
   propertyIds?: string[]
 ): DeclarationTotals => {
-  const yearRevenues = getRevenuesForYear(year, revenues)
-  const yearExpenses = getExpensesForYear(year, expenses)
+  const yearRevenues = getRevenuesForYear(year, revenues, propertyIds)
+  const yearExpenses = getExpensesForYear(year, expenses, propertyIds)
   const yearAmortizations = getAmortizationsForYear(year, amortizations, propertyIds)
 
   const totalRevenue = yearRevenues.reduce((sum, revenue) => sum + ensureNumber(revenue.amount), 0)

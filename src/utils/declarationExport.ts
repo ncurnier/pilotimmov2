@@ -61,7 +61,7 @@ export const buildDeclarationSummary = (context: DeclarationContext): string => 
     'Biens déclarés',
     properties.length > 0
       ? properties.map((property) => `• ${property.address || property.id}`)
-      : ['Aucun bien associé']
+      : ['Aucun bien associé.']
   )
 
   const revenuesSection = buildTextSection(
@@ -71,7 +71,7 @@ export const buildDeclarationSummary = (context: DeclarationContext): string => 
           (revenue) =>
             `${formatDate(revenue.date)} - ${formatCurrency(revenue.amount)} (${revenue.description || revenue.type})`
         )
-      : ['Aucun revenu enregistré']
+      : ['Aucun revenu enregistré.']
   )
 
   const expensesSection = buildTextSection(
@@ -81,7 +81,7 @@ export const buildDeclarationSummary = (context: DeclarationContext): string => 
           (expense) =>
             `${formatDate(expense.date)} - ${formatCurrency(expense.amount)} (${expense.description || expense.category})`
         )
-      : ['Aucune dépense enregistrée']
+      : ['Aucune dépense enregistrée.']
   )
 
   const amortizationsSection = buildTextSection(
@@ -91,7 +91,7 @@ export const buildDeclarationSummary = (context: DeclarationContext): string => 
           (amortization) =>
             `${formatDate(amortization.purchase_date)} - ${formatCurrency(amortization.annual_amortization)} (${amortization.item_name}, ${amortization.useful_life_years} ans)`
         )
-      : ["Aucun amortissement actif pour l'année fiscale"]
+      : ["Aucun amortissement actif pour l'année fiscale."]
   )
 
   const totalsSection = buildTextSection('Totaux LMNP (BIC réel)', [
@@ -108,7 +108,7 @@ export const buildDeclarationSummary = (context: DeclarationContext): string => 
 
   return [
     header,
-    'Régime LMNP BIC - intégration des amortissements selon les règles fiscales en vigueur',
+    'Régime LMNP BIC : intégration des amortissements selon les règles fiscales en vigueur.',
     propertiesSection,
     revenuesSection,
     expensesSection,

@@ -23,8 +23,8 @@ export const buildDeclarationContext = (
   allProperties: Property[],
   allAmortizations: Amortization[]
 ): DeclarationContext => {
-  const revenues = getRevenuesForYear(declaration.year, allRevenues)
-  const expenses = getExpensesForYear(declaration.year, allExpenses)
+  const revenues = getRevenuesForYear(declaration.year, allRevenues, declaration.properties)
+  const expenses = getExpensesForYear(declaration.year, allExpenses, declaration.properties)
   const properties = allProperties.filter((property) => declaration.properties?.includes(property.id))
   const amortizations = getAmortizationsForYear(declaration.year, allAmortizations, declaration.properties)
   const totals = calculateDeclarationTotals(
