@@ -24,12 +24,12 @@ type PropertyState = {
 
 export const useCurrentProperty = create<PropertyState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       currentPropertyId: null,
       currentProperty: null,
       isPropertySelected: false,
-      setCurrentProperty: (property) => set({ 
-        currentPropertyId: property.id, 
+      setCurrentProperty: (property) => set({
+        currentPropertyId: property.id,
         currentProperty: property,
         isPropertySelected: true
       }),
@@ -37,8 +37,8 @@ export const useCurrentProperty = create<PropertyState>()(
         currentPropertyId: id,
         isPropertySelected: !!id
       }),
-      clearCurrentProperty: () => set({ 
-        currentPropertyId: null, 
+      clearCurrentProperty: () => set({
+        currentPropertyId: null,
         currentProperty: null,
         isPropertySelected: false
       }),

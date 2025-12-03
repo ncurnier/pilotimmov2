@@ -15,6 +15,7 @@ import { FormationsPage } from '@/components/FormationsPage';
 import { CommunautePage } from '@/components/CommunautePage';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
+import { PlaceholderPage } from '@/components/PlaceholderPage';
 import logger from '@/utils/logger';
 
 
@@ -85,50 +86,33 @@ function App() {
         return <CommunautePage />;
       case 'notifications':
         return (
-          <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Notifications</h1>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <p className="text-gray-600">Page des notifications en cours de développement</p>
-            </div>
-          </div>
+          <PlaceholderPage
+            title="Notifications"
+            description="Page des notifications en cours de développement"
+          />
         );
       case 'settings':
         return (
-          <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Paramètres</h1>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <p className="text-gray-600">Page des paramètres en cours de développement</p>
-            </div>
-          </div>
+          <PlaceholderPage
+            title="Paramètres"
+            description="Page des paramètres en cours de développement"
+          />
         );
       case 'help':
         return (
-          <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Centre d'aide</h1>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <p className="text-gray-600">Centre d'aide en cours de développement</p>
-            </div>
-          </div>
+          <PlaceholderPage
+            title="Centre d'aide"
+            description="Centre d'aide en cours de développement"
+          />
         );
       case 'amortissements_new':
         return (
-          <div className="p-6 max-w-4xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Nouvel amortissement</h1>
-              <p className="text-gray-600">Ajoutez un équipement à amortir selon les règles LMNP</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
-              <div className="text-center py-8">
-                <p className="text-gray-600">Fonctionnalité en cours de développement</p>
-                <button
-                  onClick={() => setCurrentPage('amortissements')}
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Retour aux amortissements
-                </button>
-              </div>
-            </div>
-          </div>
+          <PlaceholderPage
+            title="Nouvel amortissement"
+            description="Ajoutez un équipement à amortir selon les règles LMNP. Fonctionnalité en cours de développement."
+            actionLabel="Retour aux amortissements"
+            onAction={() => setCurrentPage('amortissements')}
+          />
         );
 
       default:
