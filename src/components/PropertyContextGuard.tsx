@@ -1,10 +1,10 @@
-import React from 'react';
+import { type ReactNode } from 'react';
 import { AlertCircle, Home, Plus } from 'lucide-react';
 import { useCurrentProperty } from '@/store/useCurrentProperty';
 import { PropertySwitcher } from './PropertySwitcher';
 
 interface PropertyContextGuardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   requireProperty?: boolean;
   fallbackMessage?: string;
   showPropertySwitcher?: boolean;

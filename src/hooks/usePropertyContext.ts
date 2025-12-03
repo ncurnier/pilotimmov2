@@ -123,11 +123,11 @@ export function usePropertyCRUD() {
     ...context,
     
     // Wrapper pour les créations avec injection automatique
-    createWithProperty: async <T, R>(
+    createWithProperty: async <T extends Record<string, unknown>, R>(
       createFn: (data: T & { property_id: string }) => Promise<R>,
       data: T
     ): Promise<R> => {
-      const dataWithProperty = context.injectPropertyId(data);
+      const dataWithProperty = context.injectPropertyId(data) as T & { property_id: string };
       return createFn(dataWithProperty);
     },
 

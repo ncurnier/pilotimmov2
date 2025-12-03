@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Users, Plus, Edit, Trash2, Calendar, Phone, Mail, MapPin } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '@/hooks/usePropertyContext';
@@ -85,7 +85,7 @@ export function TenantsPage() {
     }
   }, [user, currentPropertyId, loadData]);
 
-  const handleAddTenant = async (e: React.FormEvent) => {
+  const handleAddTenant = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !canCreate) return;
 
@@ -103,6 +103,11 @@ export function TenantsPage() {
       setError(null);
       
       // Terminer le bail du locataire actuel s'il y en a un
+      if (!currentPropertyId) {
+        setError(errors.noPropertySelected);
+        return;
+      }
+
       const currentTenant = await tenantService.getCurrentTenant(currentPropertyId);
       if (currentTenant) {
         await tenantService.endTenancy(currentTenant.id, newTenant.startDate);
@@ -118,8 +123,8 @@ export function TenantsPage() {
         end_date: newTenant.endDate || undefined,
         monthly_rent: newTenant.monthlyRent,
         deposit: newTenant.deposit,
-        status: 'active',
-        notes: newTenant.notes
+        status: 'active' as const,
+        notes: newTenant.notes || undefined
       });
       
       await tenantService.create(tenantData);
@@ -149,7 +154,7 @@ export function TenantsPage() {
     setShowAddForm(true);
   };
 
-  const handleUpdateTenant = async (e: React.FormEvent) => {
+  const handleUpdateTenant = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !editingTenant) return;
 
@@ -164,7 +169,7 @@ export function TenantsPage() {
         end_date: newTenant.endDate || undefined,
         monthly_rent: newTenant.monthlyRent,
         deposit: newTenant.deposit,
-        notes: newTenant.notes
+        notes: newTenant.notes || undefined
       });
 
       resetForm();

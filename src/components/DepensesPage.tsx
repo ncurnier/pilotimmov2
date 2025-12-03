@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Leaf, ToggleLeft, ToggleRight, Edit, Plus, Trash2 } from 'lucide-react';
 import { PropertyContextGuard } from './PropertyContextGuard';
 import { usePropertyContext } from '@/hooks/usePropertyContext';

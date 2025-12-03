@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BookOpen, Play, Users, Award, CheckCircle, Star } from 'lucide-react';
 import logger from '@/utils/logger';
 
@@ -223,7 +223,7 @@ export function FormationsPage() {
                   <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
                   <span className="text-sm text-gray-600">{formation.instructor}</span>
                   {formation.certificate && (
-                    <Award className="h-4 w-4 text-yellow-500" title="Certification incluse" />
+                    <Award className="h-4 w-4 text-yellow-500" aria-hidden="true" />
                   )}
                 </div>
                 <button 

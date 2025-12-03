@@ -1,4 +1,3 @@
-import React from 'react';
 import { Building2, Calculator, Shield, TrendingUp, Users, CheckCircle } from 'lucide-react';
 
 interface LandingPageProps {

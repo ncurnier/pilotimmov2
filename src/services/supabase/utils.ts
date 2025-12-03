@@ -21,7 +21,7 @@ export async function initializeUserProfile(
   displayName: string
 ): Promise<UserProfile> {
   try {
-    const existingProfile = await userService.getByUserId(user_id)
+    const existingProfile = await userService.getProfileByUserId(user_id)
     
     if (existingProfile) {
       return existingProfile

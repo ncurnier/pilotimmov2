@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -36,7 +36,8 @@ export function Dashboard({ onPageChange }: DashboardProps) {
     propertiesCount: 0,
     totalRevenue: 0,
     totalExpenses: 0,
-    netProfit: 0
+    netProfit: 0,
+    unreadNotifications: 0
   });
 
   // Charger les statistiques en temps réel
@@ -57,7 +58,8 @@ export function Dashboard({ onPageChange }: DashboardProps) {
         propertiesCount: properties.length,
         totalRevenue,
         totalExpenses,
-        netProfit: totalRevenue - totalExpenses
+        netProfit: totalRevenue - totalExpenses,
+        unreadNotifications: 0
       });
     } catch (error) {
       logger.error('Error loading real-time stats:', error);

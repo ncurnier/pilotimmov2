@@ -10,20 +10,24 @@ class UserService extends BaseService<UserProfile> {
     return super.create(userData)
   }
 
-  async getByUserId(user_id: string): Promise<UserProfile | null> {
+  override async getByUserId(user_id: string): Promise<UserProfile[]> {
     try {
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('user_id', user_id)
-        .single()
 
       if (error && error.code !== 'PGRST116') throw error
-      return data || null
+      return data || []
     } catch (error) {
       logger.error('Failed to get user by user_id', error)
       throw error
     }
+  }
+
+  async getProfileByUserId(user_id: string): Promise<UserProfile | null> {
+    const profiles = await this.getByUserId(user_id)
+    return profiles[0] || null
   }
 
   async getById(id: string): Promise<UserProfile | null> {
@@ -36,7 +40,7 @@ class UserService extends BaseService<UserProfile> {
 
   async updateStats(userId: string, stats: Partial<UserProfile['stats']>): Promise<void> {
     try {
-      const user = await this.getByUserId(userId)
+      const user = await this.getProfileByUserId(userId)
       if (!user) throw new Error('User not found')
 
       const updatedStats = { ...user.stats, ...stats }
@@ -60,7 +64,7 @@ class UserService extends BaseService<UserProfile> {
 
   async updatePreferences(userId: string, preferences: Partial<UserProfile['preferences']>): Promise<void> {
     try {
-      const user = await this.getByUserId(userId)
+      const user = await this.getProfileByUserId(userId)
       if (!user) throw new Error('User not found')
 
       const updatedPreferences = { ...user.preferences, ...preferences }
