@@ -107,6 +107,18 @@ export interface Amortization {
   updated_at: string
 }
 
+export interface Declarant {
+  full_name?: string
+  email?: string
+  phone?: string
+  address?: string
+  postal_code?: string
+  city?: string
+  country?: string
+  tax_number?: string
+  siren?: string
+}
+
 export interface Declaration {
   id: string
   user_id: string
@@ -128,6 +140,7 @@ export interface DeclarationDetails {
   regime?: string
   first_declaration?: boolean
   notes?: string
+  declarant?: Declarant
 }
 
 export interface Notification {
