@@ -86,6 +86,10 @@ Tous les services suivent le pattern BaseService avec :
 - ✅ **Dépenses** - Charges déductibles par catégorie
 - ✅ **Amortissements** - Calculs automatiques selon règles LMNP
 - ✅ **Déclarations** - Génération et suivi fiscal
+  - Edition de la liasse fiscale complète : mapping structuré des formulaires 2031/2031 bis/2033 basé sur les données comptables
+    et validations de cohérence
+  - Export horodaté de la liasse en PDF ou payload EDI avec journalisation des générations
+  - Nouvelle interface de revue/édition des cases fiscales intégrée aux détails de déclaration
 - ✅ **Dashboard** - Statistiques et KPIs en temps réel
 
 ### Services additionnels
