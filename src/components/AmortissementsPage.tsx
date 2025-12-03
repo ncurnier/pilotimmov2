@@ -93,6 +93,20 @@ export function AmortissementsPage() {
     }));
   };
 
+  const openCreateForm = () => {
+    setEditingAmortization(null);
+    setError(null);
+    setNewAmortization({
+      itemName: '',
+      category: 'mobilier',
+      purchaseDate: new Date().toISOString().split('T')[0],
+      purchaseAmount: 0,
+      usefulLifeYears: amortizationService.getUsefulLifeByCategory('mobilier'),
+      notes: ''
+    });
+    setShowAddForm(true);
+  };
+
   const handleAddAmortization = async (e: FormEvent) => {
     e.preventDefault();
     if (!user || !canCreate) return;
@@ -114,11 +128,14 @@ export function AmortissementsPage() {
 
     try {
       setError(null);
-      
+
+      const purchaseAmount = ensureNumber(newAmortization.purchaseAmount);
+      const usefulLifeYears = ensureNumber(newAmortization.usefulLifeYears);
+
       // Validation côté client avec le service
       const validationErrors = amortizationService.validateAmortizationData({
-        purchase_amount: newAmortization.purchaseAmount,
-        useful_life_years: newAmortization.usefulLifeYears
+        purchase_amount: purchaseAmount,
+        useful_life_years: usefulLifeYears
       });
       
       if (validationErrors.length > 0) {
@@ -126,19 +143,18 @@ export function AmortissementsPage() {
         return;
       }
 
-      const annualAmortization =
-        newAmortization.purchaseAmount / newAmortization.usefulLifeYears;
+      const annualAmortization = purchaseAmount / usefulLifeYears;
 
       const amortizationData = injectPropertyId({
         user_id: user.uid,
         item_name: newAmortization.itemName,
         category: newAmortization.category,
         purchase_date: newAmortization.purchaseDate,
-        purchase_amount: newAmortization.purchaseAmount,
-        useful_life_years: newAmortization.usefulLifeYears,
+        purchase_amount: purchaseAmount,
+        useful_life_years: usefulLifeYears,
         annual_amortization: ensureNumber(annualAmortization),
         accumulated_amortization: 0,
-        remaining_value: newAmortization.purchaseAmount,
+        remaining_value: purchaseAmount,
         status: 'active' as const,
         notes: newAmortization.notes || undefined
       });
@@ -278,23 +294,16 @@ export function AmortissementsPage() {
         </div>
         <div className="flex space-x-3">
           <button
-            onClick={() => window.location.hash = '#amortissements_new'}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Nouvel amortissement</span>
-          </button>
-          <button
             disabled={!canCreate}
-            onClick={() => setShowAddForm(true)}
-            className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-              canCreate 
-                ? 'bg-green-600 text-white hover:bg-green-700' 
+            onClick={openCreateForm}
+            className={`px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 ${
+              canCreate
+                ? 'bg-blue-600 text-white'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
             <Plus className="h-4 w-4" />
-            <span>Ajout rapide</span>
+            <span>Nouvel amortissement</span>
           </button>
         </div>
       </div>
