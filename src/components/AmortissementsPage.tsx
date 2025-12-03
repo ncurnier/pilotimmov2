@@ -236,6 +236,7 @@ export function AmortissementsPage() {
       'electromenager': 'Électroménager',
       'informatique': 'Informatique',
       'travaux': 'Travaux',
+      'immeuble_hors_terrain': 'Immeuble hors terrain',
       'amenagement': 'Aménagement',
       'autre': 'Autre'
     };
@@ -369,6 +370,7 @@ export function AmortissementsPage() {
                   <option value="electromenager">Électroménager (5 ans)</option>
                   <option value="informatique">Informatique (3 ans)</option>
                   <option value="travaux">Travaux (20 ans)</option>
+                  <option value="immeuble_hors_terrain">Immeuble hors terrain (30 ans)</option>
                   <option value="amenagement">Aménagement (15 ans)</option>
                   <option value="autre">Autre (5 ans)</option>
                 </select>

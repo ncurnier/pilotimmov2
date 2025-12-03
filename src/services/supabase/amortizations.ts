@@ -3,7 +3,14 @@ import { BaseService } from './base'
 import type { Amortization } from './types'
 import logger from '@/utils/logger'
 
-export type AmortizationCategory = 'mobilier' | 'electromenager' | 'informatique' | 'travaux' | 'amenagement' | 'autre'
+export type AmortizationCategory =
+  | 'mobilier'
+  | 'electromenager'
+  | 'informatique'
+  | 'travaux'
+  | 'amenagement'
+  | 'immeuble_hors_terrain'
+  | 'autre'
 
 class AmortizationService extends BaseService<Amortization> {
   protected tableName = 'amortizations'
@@ -43,6 +50,7 @@ class AmortizationService extends BaseService<Amortization> {
       'informatique': 3,
       'travaux': 20,
       'amenagement': 15,
+      'immeuble_hors_terrain': 30,
       'autre': 5
     }
     return categoryLifeMap[category] || 10
