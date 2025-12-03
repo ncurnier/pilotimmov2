@@ -16,6 +16,7 @@ import { CommunautePage } from '@/components/CommunautePage';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { PlaceholderPage } from '@/components/PlaceholderPage';
+import { AccountingReportsPage } from '@/components/AccountingReportsPage';
 import logger from '@/utils/logger';
 
 
@@ -84,6 +85,8 @@ function App() {
         return <FormationsPage />;
       case 'communaute':
         return <CommunautePage />;
+      case 'reports':
+        return <AccountingReportsPage />;
       case 'notifications':
         return (
           <PlaceholderPage
