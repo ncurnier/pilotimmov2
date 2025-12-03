@@ -124,7 +124,20 @@ export const useDeclarations = (userId?: string | null): UseDeclarationsResult =
           created_automatically: true,
           description: `Déclaration ${year + 1} des revenus ${year}`,
           regime: 'real',
-          first_declaration: declarations.length === 0
+          first_declaration: declarations.length === 0,
+          declarant: {
+            company_name: '',
+            siren: '',
+            vat_number: '',
+            ape_code: '',
+            address_line1: '',
+            address_line2: '',
+            postal_code: '',
+            city: '',
+            country: 'France',
+            contact_email: '',
+            contact_phone: ''
+          }
         }
       })
 

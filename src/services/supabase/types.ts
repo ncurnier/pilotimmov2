@@ -122,12 +122,27 @@ export interface Declaration {
   updated_at: string
 }
 
+export interface Declarant {
+  company_name: string
+  siren: string
+  vat_number?: string
+  ape_code?: string
+  address_line1: string
+  address_line2?: string
+  postal_code: string
+  city: string
+  country: string
+  contact_email: string
+  contact_phone?: string
+}
+
 export interface DeclarationDetails {
   created_automatically?: boolean
   description?: string
   regime?: string
   first_declaration?: boolean
   notes?: string
+  declarant?: Declarant
 }
 
 export interface Notification {

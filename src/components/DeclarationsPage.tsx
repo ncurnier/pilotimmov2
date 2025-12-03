@@ -5,7 +5,8 @@ import { formatDate, formatCurrency } from '@/services/supabase/utils'
 import { useDeclarations } from '@/hooks/useDeclarations'
 import { calculateDeclarationTotals } from '@/domain/declarations/calculations'
 import { DeclarationDetailsModal } from './DeclarationDetailsModal'
-import type { Declaration } from '@/services/supabase/types'
+import { DeclarantForm } from './DeclarantForm'
+import type { Declaration, Declarant } from '@/services/supabase/types'
 import { downloadDeclarationPdf } from '@/utils/declarationExport'
 
 interface DeclarationsPageProps {
@@ -17,6 +18,7 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
   const [showNewDeclarationForm, setShowNewDeclarationForm] = useState(false)
   const [newDeclarationYear, setNewDeclarationYear] = useState(new Date().getFullYear() - 1)
   const [selectedDeclarationId, setSelectedDeclarationId] = useState<string | null>(null)
+  const [savingDeclarant, setSavingDeclarant] = useState(false)
 
   const {
     declarations,
@@ -85,6 +87,18 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
     if (!selectedDeclaration) return
     await updateDeclarationDetails(selectedDeclaration.id, { details })
     await refresh()
+  }
+
+  const handleSaveDeclarant = async (declarant: Declarant) => {
+    if (!currentDeclaration) return
+
+    setSavingDeclarant(true)
+    try {
+      await updateDeclarationDetails(currentDeclaration.id, { details: { declarant } })
+      await refresh()
+    } finally {
+      setSavingDeclarant(false)
+    }
   }
 
   const handleRefreshTotals = async () => {
@@ -358,8 +372,24 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
               </button>
             </div>
           )}
-        </div>
       </div>
+    </div>
+
+      {currentDeclaration && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">Informations du déclarant</h2>
+            <p className="text-gray-600">Saisissez et révisez les informations légales du déclarant.</p>
+          </div>
+          <div className="p-6">
+            <DeclarantForm
+              declarant={currentDeclaration.details.declarant}
+              onSave={handleSaveDeclarant}
+              saving={savingDeclarant}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 border-b border-gray-100">
