@@ -6,7 +6,9 @@ import { useDeclarations } from '@/hooks/useDeclarations'
 import { calculateDeclarationTotals } from '@/domain/declarations/calculations'
 import { DeclarationDetailsModal } from './DeclarationDetailsModal'
 import type { Declaration } from '@/services/supabase/types'
-import { downloadDeclarationPdf } from '@/utils/declarationExport'
+import { downloadLiassePdf } from '@/utils/declarationExport'
+import { buildFormMappings, validateFormMappings } from '@/domain/declarations/formMapping'
+import type { GenerationLogEntry } from './LiasseGenerationPanel'
 
 interface DeclarationsPageProps {
   onPageChange?: (page: string) => void
@@ -17,6 +19,8 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
   const [showNewDeclarationForm, setShowNewDeclarationForm] = useState(false)
   const [newDeclarationYear, setNewDeclarationYear] = useState(new Date().getFullYear() - 1)
   const [selectedDeclarationId, setSelectedDeclarationId] = useState<string | null>(null)
+  const [generationLog, setGenerationLog] = useState<GenerationLogEntry[]>([])
+  const currentUserLabel = user?.email || user?.user_metadata?.full_name || user?.uid || 'Utilisateur'
 
   const {
     declarations,
@@ -85,6 +89,30 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
     if (!selectedDeclaration) return
     await updateDeclarationDetails(selectedDeclaration.id, { details })
     await refresh()
+  }
+
+  const registerGeneration = (entry: GenerationLogEntry) => {
+    setGenerationLog((previous) => [entry, ...previous])
+  }
+
+  const handleQuickExport = (declaration: Declaration) => {
+    const context = getDeclarationContext(declaration)
+    const mappings = buildFormMappings(context, {})
+    const issues = validateFormMappings(mappings, context)
+    const generatedAt = new Date()
+
+    downloadLiassePdf(context, mappings, issues, generatedAt)
+
+    registerGeneration({
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
+      declarationId: declaration.id,
+      year: declaration.year,
+      format: 'pdf',
+      generatedAt: generatedAt.toISOString(),
+      user: currentUserLabel,
+      status: 'success',
+      notes: issues.length > 0 ? 'Export via raccourci avec alertes' : undefined
+    })
   }
 
   const handleRefreshTotals = async () => {
@@ -332,15 +360,15 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
                       <span>Voir les détails</span>
                     </button>
 
-                    {currentDeclaration.status === 'completed' && currentContext && (
-                      <button
-                        onClick={() => downloadDeclarationPdf(currentContext)}
-                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center space-x-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Télécharger PDF</span>
-                      </button>
-                    )}
+                      {currentDeclaration.status === 'completed' && currentContext && (
+                        <button
+                          onClick={() => handleQuickExport(currentDeclaration)}
+                          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center space-x-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          <span>Exporter (PDF)</span>
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
@@ -440,19 +468,19 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
                     </div>
 
                     <div className="flex space-x-2 ml-4">
-                      <button
-                        onClick={() => handleOpenDetails(declaration)}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Voir les détails"
-                      >
+                        <button
+                          onClick={() => handleOpenDetails(declaration)}
+                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Voir les détails"
+                        >
                         <Eye className="h-4 w-4" />
                       </button>
 
                       {declaration.status === 'completed' && (
                         <button
-                          onClick={() => downloadDeclarationPdf(getDeclarationContext(declaration))}
+                          onClick={() => handleQuickExport(declaration)}
                           className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                          title="Télécharger PDF"
+                          title="Exporter la liasse"
                         >
                           <Download className="h-4 w-4" />
                         </button>
@@ -583,16 +611,18 @@ export function DeclarationsPage({ onPageChange }: DeclarationsPageProps) {
         </div>
       </div>
 
-      {selectedDeclaration && selectedContext && (
-        <DeclarationDetailsModal
-          declaration={selectedDeclaration}
-          context={selectedContext}
-          onClose={() => setSelectedDeclarationId(null)}
-          onDownload={downloadDeclarationPdf}
-          onSaveDetails={handleSaveDetails}
-          onRefreshTotals={handleRefreshTotals}
-        />
-      )}
-    </div>
-  )
-}
+        {selectedDeclaration && selectedContext && (
+          <DeclarationDetailsModal
+            declaration={selectedDeclaration}
+            context={selectedContext}
+            onClose={() => setSelectedDeclarationId(null)}
+            onSaveDetails={handleSaveDetails}
+            onRefreshTotals={handleRefreshTotals}
+            generationLog={generationLog.filter((entry) => entry.declarationId === selectedDeclaration.id)}
+            onRegisterGeneration={registerGeneration}
+            currentUserLabel={currentUserLabel}
+          />
+        )}
+      </div>
+    )
+  }

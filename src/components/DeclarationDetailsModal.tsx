@@ -3,23 +3,35 @@ import { Download, RefreshCcw, Save, X } from 'lucide-react'
 import type { Declaration, DeclarationDetails } from '@/services/supabase/types'
 import type { DeclarationContext } from '@/domain/declarations/context'
 import { formatCurrency, formatDate } from '@/services/supabase/utils'
+import {
+  buildFormMappings,
+  type FormOverrides,
+  type LiasseFormType,
+  validateFormMappings
+} from '@/domain/declarations/formMapping'
+import { downloadLiasseEdi, downloadLiassePdf } from '@/utils/declarationExport'
+import { LiasseGenerationPanel, type GenerationLogEntry } from './LiasseGenerationPanel'
 
 interface DeclarationDetailsModalProps {
   declaration: Declaration
   context: DeclarationContext
   onClose: () => void
-  onDownload: (context: DeclarationContext) => void
   onSaveDetails: (details: DeclarationDetails) => Promise<void>
   onRefreshTotals: () => Promise<void>
+  generationLog: GenerationLogEntry[]
+  onRegisterGeneration: (entry: GenerationLogEntry) => void
+  currentUserLabel: string
 }
 
 export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = ({
   declaration,
   context,
   onClose,
-  onDownload,
   onSaveDetails,
-  onRefreshTotals
+  onRefreshTotals,
+  generationLog,
+  onRegisterGeneration,
+  currentUserLabel
 }) => {
   const [details, setDetails] = useState<DeclarationDetails>(() => ({
     description: declaration.details?.description ?? '',
@@ -27,6 +39,8 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
     notes: declaration.details?.notes ?? ''
   }))
   const [saving, setSaving] = useState(false)
+  const [formOverrides, setFormOverrides] = useState<FormOverrides>({})
+  const [selectedForm, setSelectedForm] = useState<LiasseFormType>('2031')
 
   useEffect(() => {
     setDetails({
@@ -37,11 +51,50 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
   }, [declaration.details?.description, declaration.details?.notes, declaration.details?.regime])
 
   const totals = useMemo(() => context.totals, [context.totals])
+  const formMappings = useMemo(() => buildFormMappings(context, formOverrides), [context, formOverrides])
+  const validationIssues = useMemo(
+    () => validateFormMappings(formMappings, context),
+    [context, formMappings]
+  )
 
   const handleSubmit = async () => {
     setSaving(true)
     await onSaveDetails(details)
     setSaving(false)
+  }
+
+  const handleOverrideChange = (form: LiasseFormType, code: string, value: number | null) => {
+    setFormOverrides((previous) => {
+      const next = { ...previous }
+      if (!next[form]) next[form] = {}
+      if (value === null || Number.isNaN(value)) {
+        delete next[form]?.[code]
+      } else {
+        next[form]![code] = value
+      }
+      return { ...next }
+    })
+  }
+
+  const handleExport = (format: GenerationLogEntry['format']) => {
+    const generatedAt = new Date()
+
+    if (format === 'pdf') {
+      downloadLiassePdf(context, formMappings, validationIssues, generatedAt)
+    } else {
+      downloadLiasseEdi(context, formMappings, validationIssues, generatedAt)
+    }
+
+    onRegisterGeneration({
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`,
+      declarationId: declaration.id,
+      year: declaration.year,
+      format,
+      generatedAt: generatedAt.toISOString(),
+      user: currentUserLabel,
+      status: 'success',
+      notes: validationIssues.length > 0 ? 'Export avec alertes de cohérence' : undefined
+    })
   }
 
   return (
@@ -205,11 +258,11 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={() => onDownload(context)}
+                  onClick={() => handleExport('pdf')}
                   className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Télécharger</span>
+                  <span>Export PDF horodaté</span>
                 </button>
                 <button
                   onClick={handleSubmit}
@@ -222,6 +275,17 @@ export const DeclarationDetailsModal: React.FC<DeclarationDetailsModalProps> = (
               </div>
             </div>
           </div>
+
+          <LiasseGenerationPanel
+            mappings={formMappings}
+            validations={validationIssues}
+            overrides={formOverrides}
+            selectedForm={selectedForm}
+            onSelectForm={setSelectedForm}
+            onOverrideChange={handleOverrideChange}
+            onExport={handleExport}
+            generationLog={generationLog}
+          />
         </div>
       </div>
     </div>

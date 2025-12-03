@@ -1,4 +1,5 @@
 import type { DeclarationContext } from '@/domain/declarations/context'
+import type { LiasseFormMapping, FormValidationIssue } from '@/domain/declarations/formMapping'
 import { formatCurrency, formatDate } from '@/services/supabase/utils'
 
 const buildTextSection = (title: string, lines: string[]): string => {
@@ -125,6 +126,86 @@ export const downloadDeclarationPdf = (context: DeclarationContext) => {
   const link = document.createElement('a')
   link.href = url
   link.download = `declaration-lmnp-${context.declaration.year}.pdf`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+const buildLiasseSummary = (
+  context: DeclarationContext,
+  mappings: LiasseFormMapping[],
+  issues: FormValidationIssue[],
+  generatedAt: Date
+): string => {
+  const baseSummary = buildDeclarationSummary(context)
+  const mappingLines = mappings
+    .map((mapping) => {
+      const title = `${mapping.title}`
+      const rows = mapping.cases.map((item) => {
+        const overrideFlag = item.overridden ? ' (ajusté manuellement)' : ''
+        return `${item.code} - ${item.label}: ${formatCurrency(item.value)}${overrideFlag}`
+      })
+      return [title, ...rows].join('\n')
+    })
+    .join('\n\n')
+
+  const validationLines =
+    issues.length > 0
+      ? [
+          'Contrôles de cohérence',
+          ...issues.map((issue) => `• ${issue.form.toString()} ${issue.code}: ${issue.message}`)
+        ].join('\n')
+      : 'Contrôles de cohérence: aucune alerte.'
+
+  return [
+    `${baseSummary}\n\n---\nGénération de liasse le ${formatDate(generatedAt.toISOString())}`,
+    mappingLines,
+    validationLines
+  ].join('\n\n')
+}
+
+export const downloadLiassePdf = (
+  context: DeclarationContext,
+  mappings: LiasseFormMapping[],
+  issues: FormValidationIssue[],
+  generatedAt: Date
+) => {
+  const summary = buildLiasseSummary(context, mappings, issues, generatedAt)
+  const pdfBlob = buildPdfDocument(summary)
+  const url = URL.createObjectURL(pdfBlob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `liasse-lmnp-${context.declaration.year}-${generatedAt.toISOString()}.pdf`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+export const downloadLiasseEdi = (
+  context: DeclarationContext,
+  mappings: LiasseFormMapping[],
+  issues: FormValidationIssue[],
+  generatedAt: Date
+) => {
+  const payload = {
+    declaration_id: context.declaration.id,
+    year: context.declaration.year,
+    generated_at: generatedAt.toISOString(),
+    forms: mappings.map((mapping) => ({
+      form: mapping.form,
+      cases: mapping.cases.map((item) => ({
+        code: item.code,
+        label: item.label,
+        value: item.value,
+        overridden: item.overridden
+      }))
+    })),
+    validations: issues
+  }
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `liasse-edi-${context.declaration.year}-${generatedAt.toISOString()}.json`
   link.click()
   URL.revokeObjectURL(url)
 }
